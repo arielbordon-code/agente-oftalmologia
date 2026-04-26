@@ -9,7 +9,7 @@ from datetime import datetime
 import os
 import json
 
-SHEET_ID = os.getenv("SHEET_ID", "")
+SHEET_ID = os.getenv("SHEET_ID", "1H8Zzqvhju80ePBawZGy8W1-zvXeR5HfyMSI3DCQqCA8")
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "google-credentials.json")
 
 SCOPES = [
@@ -27,10 +27,10 @@ HEADERS = [
     "Estado",
 ]
 
-# Azul Centro de Ojos
-COLOR_AZUL = Color(0.12, 0.35, 0.65)
-COLOR_TITULO = Color(0.07, 0.22, 0.45)
-COLOR_FILA_PAR = Color(0.88, 0.92, 0.97)
+# Turquesa Centro de Ojos
+COLOR_VERDE = Color(0.10, 0.60, 0.65)
+COLOR_TITULO = Color(0.05, 0.40, 0.45)
+COLOR_FILA_PAR = Color(0.88, 0.96, 0.97)
 COLOR_BLANCO = Color(1, 1, 1)
 
 
@@ -56,7 +56,7 @@ def setup_formato():
 
     sheet.update_title("Leads WhatsApp")
 
-    sheet.update("A1:G1", [["Centro de Ojos La Rioja — Leads WhatsApp"] + [""] * 6])
+    sheet.update("A1:G1", [["Centro de Ojos La Rioja — Pacientes WhatsApp"] + [""] * 6])
     sheet.merge_cells("A1:G1")
     format_cell_range(sheet, "A1:G1", CellFormat(
         backgroundColor=COLOR_TITULO,
@@ -66,7 +66,7 @@ def setup_formato():
 
     sheet.update("A2:G2", [HEADERS])
     format_cell_range(sheet, "A2:G2", CellFormat(
-        backgroundColor=COLOR_AZUL,
+        backgroundColor=COLOR_VERDE,
         textFormat=TextFormat(bold=True, fontSize=11, foregroundColor=COLOR_BLANCO),
         horizontalAlignment="CENTER",
     ))
