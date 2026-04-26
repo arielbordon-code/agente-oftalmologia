@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+google-credentials.json
+*.egg-info/
+.venv/
+venv/
