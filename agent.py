@@ -160,7 +160,7 @@ class Conversation:
 class OftalmologiaAgent:
     """Agente conversacional para Centro de Ojos La Rioja."""
 
-    MODEL = "gemini-2.5-flash"
+    MODEL = "gemini-2.0-flash"
 
     def __init__(self, api_key: Optional[str] = None):
         import os
@@ -204,7 +204,7 @@ class OftalmologiaAgent:
                 ultimo_error = e
                 if intento < 2:
                     print(f"[Gemini] Error transitorio (intento {intento + 1}/3): {e}. Reintentando...")
-                    time.sleep(3)
+                    time.sleep(8)
                 else:
                     print(f"[Gemini] Error después de 3 intentos: {e}")
                     conv.messages.pop()
