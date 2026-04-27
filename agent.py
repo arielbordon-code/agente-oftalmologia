@@ -160,7 +160,7 @@ class Conversation:
 class OftalmologiaAgent:
     """Agente conversacional para Centro de Ojos La Rioja."""
 
-    MODEL = "gemini-2.0-flash"
+    MODEL = "gemini-1.5-flash"
 
     def __init__(self, api_key: Optional[str] = None):
         import os
