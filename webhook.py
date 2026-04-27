@@ -11,6 +11,7 @@ Para conectar con Twilio:
 """
 
 import os
+from collections import deque
 from flask import Flask, request, Response
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.request_validator import RequestValidator
@@ -24,6 +25,9 @@ app = Flask(__name__)
 agent = EsteticaAgent(api_key=os.getenv("GEMINI_API_KEY"))
 
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+
+# Deduplicación: evita procesar el mismo mensaje dos veces si Twilio reintenta
+_processed_sids = deque(maxlen=200)
 
 
 def validate_twilio_request(f):
@@ -40,6 +44,14 @@ def webhook():
     """Endpoint principal que recibe mensajes de WhatsApp."""
     incoming_msg = request.form.get("Body", "").strip()
     sender_number = request.form.get("From", "")
+    message_sid = request.form.get("MessageSid", "")
+
+    # Ignorar reintentos de Twilio
+    if message_sid and message_sid in _processed_sids:
+        print(f"[{sender_number}] Mensaje duplicado ignorado: {message_sid}")
+        return Response("OK", status=200)
+    if message_sid:
+        _processed_sids.append(message_sid)
 
     print(f"[{sender_number}] → {incoming_msg}")
 
