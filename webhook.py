@@ -61,7 +61,7 @@ def webhook():
     # Comandos especiales para gestión
     if incoming_msg.lower() in ["reiniciar", "restart", "nueva consulta"]:
         agent.reset_conversation(sender_number)
-        reply_text = "¡Hola nuevamente! 👋 Soy Valentina de Clínica Bella Forma. ¿En qué puedo ayudarte hoy?"
+        reply_text = "¡Hola nuevamente! 👁 Soy Valentina de Centro de Ojos La Rioja. ¿En qué te puedo ayudar hoy?"
     else:
         reply_text = agent.reply(sender_number, incoming_msg)
 
@@ -76,7 +76,7 @@ def webhook():
 @app.route("/health", methods=["GET"])
 def health():
     """Endpoint de salud para monitoreo."""
-    return {"status": "ok", "agente": "Clínica Bella Forma - Estética Corporal"}
+    return {"status": "ok", "agente": "Centro de Ojos La Rioja"}
 
 
 @app.route("/conversaciones", methods=["GET"])
@@ -90,6 +90,6 @@ def conversaciones():
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
-    print(f"🌸 Agente Clínica Bella Forma iniciado en puerto {port}")
+    print(f"👁 Agente Centro de Ojos La Rioja iniciado en puerto {port}")
     print(f"   Webhook URL: http://localhost:{port}/webhook")
     app.run(debug=True, port=port)

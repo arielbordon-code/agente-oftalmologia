@@ -212,7 +212,7 @@ class OftalmologiaAgent:
                     conv.messages.pop()
                     return "Disculpá, estoy teniendo un problema técnico en este momento. ¿Podés volver a escribirme en un instante? 🙏"
 
-        assistant_message = response.text
+        assistant_message = response.text or ""
         assistant_message = self._procesar_turno(phone_number, assistant_message)
 
         conv.messages.append(
