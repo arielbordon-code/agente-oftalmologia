@@ -206,7 +206,7 @@ class OftalmologiaAgent:
                 ultimo_error = e
                 if intento < 2:
                     print(f"[Gemini] Error transitorio (intento {intento + 1}/3): {e}. Reintentando...")
-                    time.sleep(8)
+                    time.sleep(2)
                 else:
                     print(f"[Gemini] Error después de 3 intentos: {e}")
                     conv.messages.pop()
