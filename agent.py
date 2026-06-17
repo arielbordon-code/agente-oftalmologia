@@ -125,9 +125,9 @@ Después de las 3 respuestas, evaluá la situación:
 
 SI HAY URGENCIA → Derivá de inmediato (ver sección de emergencias arriba).
 
-SI ES CONSULTA HABITUAL → En un solo mensaje: decí brevemente que el equipo lo va a evaluar bien, y pedile DIRECTAMENTE su nombre completo y preferencia de día y horario. NO digas que vas a "verificar disponibilidad" ni que vas a "consultar" — pedí los datos en ese mismo mensaje y agendá.
+SI ES CONSULTA HABITUAL → En un solo mensaje: decí brevemente que el equipo lo va a evaluar bien, y pedile su nombre completo y preferencia de día y horario. Esperá a que el paciente responda con esos datos ANTES de confirmar el turno.
 
-SI ES CONTROL RUTINARIO → En un solo mensaje pedile su nombre completo y preferencia de día y horario. Agendá directamente.
+SI ES CONTROL RUTINARIO → En un solo mensaje pedile su nombre completo y preferencia de día y horario. Esperá la respuesta del paciente.
 
 ## REGLAS IMPORTANTES
 - Sé siempre cálida, clara y profesional
@@ -140,13 +140,15 @@ SI ES CONTROL RUTINARIO → En un solo mensaje pedile su nombre completo y prefe
 - Siempre recordá que sos Valentina de Centro de Ojos La Rioja
 
 ## REGISTRO DE TURNO
-En el mismo mensaje donde le confirmás el turno al paciente (cuando ya tenés su nombre y horario preferido), agregá OBLIGATORIAMENTE al FINAL esta línea, reemplazando cada campo con los datos REALES del paciente:
+SOLO cuando el paciente ya te respondió con su nombre Y su horario preferido, en el mensaje de confirmación del turno agregá OBLIGATORIAMENTE al FINAL esta línea:
 ##TURNO|[nombre real del paciente]|[motivo real de consulta]|Centro de Ojos La Rioja|[día y horario real que pidió]##
 
-Ejemplo con datos reales:
-##TURNO|Carlos Méndez|Control de glaucoma|Centro de Ojos La Rioja|Martes a la mañana##
+NUNCA agregues esta señal en el mensaje donde pedís el nombre y horario — solo en el mensaje de confirmación, después de que el paciente los haya dado.
 
-IMPORTANTE: Reemplazá SIEMPRE los campos con los datos reales. Nunca escribas los corchetes ni los textos de ejemplo.
+Ejemplo con datos reales (el paciente ya respondió "Juan Pérez, prefiero el martes a la mañana"):
+##TURNO|Juan Pérez|Control de glaucoma|Centro de Ojos La Rioja|Martes a la mañana##
+
+IMPORTANTE: Reemplazá SIEMPRE los campos con los datos reales del paciente. Nunca escribas los corchetes.
 """
 
 
@@ -234,6 +236,9 @@ class OftalmologiaAgent:
             print(f"[Sheets] Turno duplicado ignorado para {phone_number}")
             return mensaje
         nombre, tratamiento, sucursal, horario = match.groups()
+        if not nombre.strip():
+            print(f"[Sheets] Señal ##TURNO## sin nombre — ignorada (señal prematura del modelo)")
+            return mensaje
         ok = registrar_lead(
             telefono=phone_number,
             nombre=nombre.strip(),
