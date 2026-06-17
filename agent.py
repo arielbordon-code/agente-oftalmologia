@@ -234,16 +234,19 @@ class OftalmologiaAgent:
             print(f"[Sheets] Turno duplicado ignorado para {phone_number}")
             return mensaje
         nombre, tratamiento, sucursal, horario = match.groups()
-        registrar_lead(
+        ok = registrar_lead(
             telefono=phone_number,
             nombre=nombre.strip(),
             tratamiento=tratamiento.strip(),
             sucursal=sucursal.strip(),
             horario=horario.strip(),
         )
-        print(f"[Sheets] Lead registrado: {nombre} — {tratamiento}")
-        if conv:
-            conv.turno_registrado = True
+        if ok:
+            print(f"[Sheets] Lead registrado: {nombre} — {tratamiento}")
+            if conv:
+                conv.turno_registrado = True
+        else:
+            print(f"[Sheets] ⚠️ Fallo al registrar lead para {phone_number}. Se reintentará en próximo mensaje.")
         return mensaje
 
     def get_conversation_summary(self, phone_number: str) -> dict:

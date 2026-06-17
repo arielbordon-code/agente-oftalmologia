@@ -110,11 +110,14 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
             "Pendiente confirmar",
         ]
         sheet.append_row(fila)
-
-        fila_num = len(sheet.col_values(1))
-        _aplicar_color_fila(sheet, fila_num)
-
-        return True
     except Exception as e:
         print(f"[Sheets] Error al registrar lead: {e}")
         return False
+
+    try:
+        fila_num = len(sheet.col_values(1))
+        _aplicar_color_fila(sheet, fila_num)
+    except Exception as e:
+        print(f"[Sheets] Error al aplicar formato (dato guardado): {e}")
+
+    return True
