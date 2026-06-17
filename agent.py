@@ -215,6 +215,11 @@ class OftalmologiaAgent:
                     return "Disculpá, estoy teniendo un problema técnico en este momento. ¿Podés volver a escribirme en un instante? 🙏"
 
         assistant_message = response.text or ""
+        tiene_senal = "##TURNO" in assistant_message
+        print(f"[DEBUG] Respuesta modelo ({len(assistant_message)} chars) — señal TURNO: {tiene_senal}")
+        if tiene_senal:
+            idx = assistant_message.find("##TURNO")
+            print(f"[DEBUG] Señal raw: {assistant_message[idx:idx+120]!r}")
         assistant_message = self._procesar_turno(phone_number, assistant_message)
 
         conv.messages.append(
