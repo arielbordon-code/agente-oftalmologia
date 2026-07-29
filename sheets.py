@@ -99,28 +99,28 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
                    sucursal: str = "", horario: str = ""):
     """Registra un lead calificado en el Sheet."""
     print(f"[Sheets] Intentando registrar: {nombre} | {tratamiento} | {horario}")
-    try:
-        sheet = get_sheet()
-        print(f"[Sheets] Conexión OK — Sheet ID: {SHEET_ID}")
-    except Exception as e:
-        print(f"[Sheets] Error de conexión: {type(e).__name__}: {e}")
-        return False
+    fila = [
+        datetime.now().strftime("%d/%m/%Y %H:%M"),
+        telefono,
+        nombre,
+        tratamiento,
+        sucursal,
+        horario,
+        "Pendiente confirmar",
+    ]
 
-    try:
-        fila = [
-            datetime.now().strftime("%d/%m/%Y %H:%M"),
-            telefono,
-            nombre,
-            tratamiento,
-            sucursal,
-            horario,
-            "Pendiente confirmar",
-        ]
-        sheet.append_row(fila)
-        print(f"[Sheets] Fila escrita correctamente")
-    except Exception as e:
-        print(f"[Sheets] Error al escribir fila: {type(e).__name__}: {e}")
-        return False
+    sheet = None
+    for intento in range(3):
+        try:
+            sheet = get_sheet()
+            sheet.append_row(fila)
+            suffix = f" (intento {intento + 1})" if intento > 0 else ""
+            print(f"[Sheets] Fila escrita correctamente{suffix}")
+            break
+        except Exception as e:
+            print(f"[Sheets] Error intento {intento + 1}/3: {type(e).__name__}: {e}")
+            if intento == 2:
+                return False
 
     try:
         fila_num = len(sheet.col_values(1))
