@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía de Capacidades — Valentina IA · Centro de Ojos La Rioja</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+:root {
+    --bg:#080d1a; --surface:#111827; --surface2:#1a2540; --border:rgba(255,255,255,0.07);
+    --green:#0d9da6; --green-dim:rgba(13,157,166,0.1); --blue:#1B75BC;
+    --text:#f1f5f9; --muted:#64748b; --muted2:#94a3b8;
+}
+html { scroll-behavior:smooth; }
+body { background:var(--bg); color:var(--text); overflow-x:hidden; }
+
+@keyframes fadeUp  { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+@keyframes glow    { 0%,100%{box-shadow:0 0 18px rgba(13,157,166,0.18)} 50%{box-shadow:0 0 36px rgba(13,157,166,0.42)} }
+@keyframes float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+@keyframes spin    { to{transform:rotate(360deg)} }
+@keyframes blink   { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.reveal { opacity:0; transform:translateY(28px); transition:opacity 0.65s ease, transform 0.65s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* HEADER */
+header {
+    position:fixed; top:0; width:100%; z-index:100;
+    background:rgba(8,13,26,0.88); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border); padding:14px 48px;
+    display:flex; align-items:center; justify-content:space-between;
+}
+.header-brand { display:flex; align-items:center; gap:16px; }
+.ser-badge { background:linear-gradient(135deg,#1a3d2b,#2d7d67); padding:6px 14px; border-radius:8px; font-weight:800; font-size:12px; letter-spacing:2px; color:#4ade80; border:1px solid rgba(74,222,128,0.2); }
+.kyrios-mini { display:flex; align-items:center; gap:7px; }
+.kyrios-mini svg { width:24px; height:24px; }
+.kyrios-mini span { font-weight:800; font-size:12px; letter-spacing:2px; color:var(--blue); }
+.doc-label { font-size:11px; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; }
+
+/* HERO */
+.hero {
+    min-height:90vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:120px 32px 80px;
+    background:radial-gradient(ellipse 80% 50% at 50% 0%, rgba(13,157,166,0.07) 0%, transparent 65%);
+    position:relative;
+}
+.hero-tag { display:inline-flex; align-items:center; gap:8px; background:var(--green-dim); border:1px solid rgba(13,157,166,0.22); color:var(--green); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:6px 18px; border-radius:100px; margin-bottom:28px; animation:fadeUp 0.7s ease forwards; }
+.live-dot { width:6px; height:6px; background:var(--green); border-radius:50%; animation:blink 2s infinite; }
+.hero h1 { font-size:clamp(32px,5.5vw,64px); font-weight:900; line-height:1.08; animation:fadeUp 0.8s 0.1s ease forwards; opacity:0; }
+.hero h1 em { font-style:normal; background:linear-gradient(135deg,#0d9da6,#2dd4cc,#6ee7e7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero-sub { font-size:17px; color:var(--muted2); max-width:580px; margin:18px auto 0; line-height:1.7; animation:fadeUp 0.8s 0.22s ease forwards; opacity:0; }
+
+.valentina-avatar {
+    width:100px; height:100px; border-radius:50%; margin:0 auto 32px;
+    background:linear-gradient(135deg,#0a8a93,#0d9da6,#2dd4cc);
+    display:flex; align-items:center; justify-content:center; font-size:40px;
+    animation:float 4s ease-in-out infinite, glow 3s ease-in-out infinite;
+    animation:fadeUp 0.7s ease forwards, float 4s 0.8s ease-in-out infinite;
+}
+
+/* SECTIONS */
+.section { padding:90px 32px; max-width:1100px; margin:0 auto; }
+.section-tag { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--green); margin-bottom:10px; }
+.section-title { font-size:clamp(26px,3.5vw,40px); font-weight:900; line-height:1.15; margin-bottom:14px; }
+.section-sub { font-size:16px; color:var(--muted2); max-width:540px; line-height:1.7; }
+
+/* CAPABILITIES GRID */
+.cap-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:20px; margin-top:48px; }
+.cap-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:28px;
+    transition:transform 0.3s, border-color 0.3s; position:relative; overflow:hidden;
+}
+.cap-card:hover { transform:translateY(-4px); border-color:rgba(13,157,166,0.25); }
+.cap-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--green),transparent); opacity:0; transition:opacity 0.3s; }
+.cap-card:hover::after { opacity:1; }
+.cap-icon { font-size:28px; margin-bottom:14px; }
+.cap-title { font-size:16px; font-weight:700; margin-bottom:8px; }
+.cap-desc { font-size:13px; color:var(--muted2); line-height:1.65; }
+.cap-tag { display:inline-block; margin-top:14px; padding:4px 12px; border-radius:100px; font-size:11px; font-weight:700; background:var(--green-dim); color:var(--green); border:1px solid rgba(13,157,166,0.18); }
+
+/* FLOW */
+.flow-wrap { margin-top:56px; }
+.flow-steps { display:flex; gap:0; align-items:stretch; overflow-x:auto; padding-bottom:8px; }
+.flow-step {
+    flex:1; min-width:160px; background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:24px 20px; text-align:center; position:relative;
+    transition:transform 0.3s, border-color 0.3s;
+}
+.flow-step:not(:last-child)::after {
+    content:'→'; position:absolute; right:-16px; top:50%; transform:translateY(-50%);
+    color:var(--green); font-size:18px; font-weight:700; z-index:2;
+}
+.flow-step:hover { transform:translateY(-3px); border-color:rgba(13,157,166,0.3); }
+.flow-num { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#0a8a93,#0d9da6); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#000; }
+.flow-icon { font-size:22px; margin-bottom:8px; }
+.flow-label { font-size:12px; font-weight:600; color:var(--text); margin-bottom:4px; }
+.flow-time { font-size:11px; color:var(--green); font-weight:600; }
+
+/* KNOWLEDGE */
+.knowledge-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:48px; }
+.know-card {
+    background:var(--surface2); border:1px solid var(--border); border-radius:14px; padding:22px;
+    display:flex; gap:14px; align-items:flex-start; transition:transform 0.3s;
+}
+.know-card:hover { transform:translateY(-3px); }
+.know-icon { font-size:24px; flex-shrink:0; }
+.know-title { font-size:14px; font-weight:700; margin-bottom:5px; }
+.know-items { font-size:12px; color:var(--muted2); line-height:1.7; }
+
+/* UPSELLS */
+.upsell-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; margin-top:48px; }
+.upsell-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:28px;
+    position:relative; overflow:hidden; transition:transform 0.3s;
+}
+.upsell-card:hover { transform:translateY(-4px); }
+.upsell-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--blue),#60a5fa); }
+.upsell-badge { display:inline-block; padding:3px 10px; background:rgba(27,117,188,0.12); color:#60a5fa; border:1px solid rgba(27,117,188,0.2); border-radius:100px; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:14px; }
+.upsell-icon { font-size:28px; margin-bottom:12px; }
+.upsell-title { font-size:15px; font-weight:700; margin-bottom:8px; }
+.upsell-desc { font-size:13px; color:var(--muted2); line-height:1.65; }
+.upsell-price { margin-top:14px; font-size:13px; color:var(--muted); }
+.upsell-price strong { color:var(--text); }
+
+/* STACK */
+.stack-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-top:48px; }
+.stack-item {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px;
+    text-align:center; transition:transform 0.3s;
+}
+.stack-item:hover { transform:translateY(-3px); }
+.stack-emoji { font-size:28px; margin-bottom:10px; }
+.stack-name { font-size:14px; font-weight:700; margin-bottom:4px; }
+.stack-role { font-size:12px; color:var(--muted2); }
+.stack-status { margin-top:10px; display:inline-block; padding:3px 10px; border-radius:100px; font-size:10px; font-weight:700; background:var(--green-dim); color:var(--green); }
+
+/* METRICS VISUAL */
+.metrics-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-top:48px; }
+.metric-big {
+    background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:28px; text-align:center;
+}
+.metric-big .num { font-size:52px; font-weight:900; line-height:1; margin-bottom:6px; }
+.metric-big .num.green { color:var(--green); }
+.metric-big .num.blue  { color:#60a5fa; }
+.metric-big .num.gold  { color:#fbbf24; }
+.metric-big .label { font-size:13px; color:var(--muted2); }
+
+/* CTA */
+.cta-wrap {
+    text-align:center; padding:80px 32px 100px;
+    background:radial-gradient(ellipse 60% 50% at 50% 100%, rgba(13,157,166,0.08) 0%, transparent 70%);
+}
+.cta-wrap h2 { font-size:clamp(24px,3.5vw,42px); font-weight:900; margin-bottom:14px; }
+.cta-wrap p { font-size:16px; color:var(--muted2); margin-bottom:36px; }
+.wa-btn { display:inline-flex; align-items:center; gap:12px; background:#25D366; color:#000; font-weight:800; font-size:15px; padding:16px 36px; border-radius:14px; text-decoration:none; transition:transform 0.2s, box-shadow 0.2s; }
+.wa-btn:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(37,211,102,0.4); }
+
+/* FOOTER */
+footer { background:#050810; border-top:1px solid var(--border); padding:28px 48px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
+.footer-kyrios { display:flex; align-items:center; gap:9px; }
+
+/* PREMIUM PAYMENT SECTION */
+.premium-section {
+    background:#07050100;
+    border-top:1px solid rgba(245,158,11,0.15);
+    border-bottom:1px solid rgba(245,158,11,0.15);
+    padding:80px 32px; position:relative; overflow:hidden;
+}
+.premium-section::before {
+    content:''; position:absolute; top:0; left:0; right:0; bottom:0;
+    background:radial-gradient(ellipse 70% 50% at 50% 0%, rgba(245,158,11,0.07) 0%, transparent 65%);
+    pointer-events:none;
+}
+.payment-badge {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.28);
+    color:#fbbf24; font-size:11px; font-weight:700; letter-spacing:2px;
+    text-transform:uppercase; padding:6px 18px; border-radius:100px; margin-bottom:28px;
+}
+.payment-flow { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:8px; margin-top:40px; }
+.payment-step {
+    background:rgba(245,158,11,0.04); border:1px solid rgba(245,158,11,0.12);
+    border-radius:16px; padding:22px 14px; text-align:center;
+    position:relative; transition:transform 0.3s, border-color 0.3s;
+}
+.payment-step:hover { transform:translateY(-3px); border-color:rgba(245,158,11,0.32); }
+.payment-step:not(:last-child)::after {
+    content:'→'; position:absolute; right:-12px; top:50%; transform:translateY(-50%);
+    color:#f59e0b; font-size:16px; font-weight:700; z-index:2;
+}
+.payment-num {
+    width:28px; height:28px; border-radius:50%;
+    background:linear-gradient(135deg,#d97706,#fbbf24);
+    margin:0 auto 8px; display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:800; color:#000;
+}
+.scenarios-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:32px; }
+.scenario-card {
+    background:rgba(245,158,11,0.04); border:1px solid rgba(245,158,11,0.12);
+    border-radius:14px; padding:22px; transition:transform 0.3s;
+}
+.scenario-card:hover { transform:translateY(-3px); border-color:rgba(245,158,11,0.28); }
+.upsell-card.premium { border-color:rgba(245,158,11,0.35); }
+.upsell-card.premium::before { background:linear-gradient(90deg,#d97706,#fbbf24,#fde68a); }
+
+@media(max-width:768px) {
+    header { padding:12px 18px; }
+    .section { padding:60px 18px; }
+    .flow-steps { flex-direction:column; }
+    .flow-step:not(:last-child)::after { content:'↓'; right:auto; top:auto; bottom:-14px; left:50%; transform:translateX(-50%); }
+    footer { flex-direction:column; text-align:center; padding:20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="header-brand">
+        <div class="ser-badge" style="background:linear-gradient(135deg,#0a3a40,#0d9da6);color:#6ee7e7;border-color:rgba(110,231,231,0.2);">CENTRO DE OJOS</div>
+        <span style="color:var(--muted)">×</span>
+        <div class="kyrios-mini">
+            <svg viewBox="0 0 500 500" fill="none">
+                <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#1B75BC"/>
+                <text x="185" y="295" font-family="Arial Black,sans-serif" font-weight="900" font-size="230" fill="white">K</text>
+            </svg>
+            <span>KYRIOS</span>
+        </div>
+    </div>
+    <div class="doc-label">Guía de Capacidades · v1.0</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="valentina-avatar">🤖</div>
+    <div class="hero-tag"><span class="live-dot"></span> Sistema activo en producción</div>
+    <h1>Todo lo que <em>Valentina</em><br>hace por Centro de Ojos La Rioja</h1>
+    <p class="hero-sub">Guía completa de capacidades actuales y tecnología. Valentina no es un chatbot con menús — es un agente de IA que razona, entiende el contexto y responde como un profesional entrenado en toda la información del centro.</p>
+</div>
+
+<!-- CAPACIDADES ACTUALES -->
+<div class="section">
+    <div class="reveal">
+        <div class="section-tag">Capacidades actuales</div>
+        <h2 class="section-title">Lo que Valentina<br>hace hoy mismo</h2>
+        <p class="section-sub">Funcionalidades en producción y disponibles desde el primer día, sin configuración adicional.</p>
+    </div>
+    <div class="cap-grid">
+        <div class="cap-card reveal" style="transition-delay:0.05s">
+            <div class="cap-icon">💬</div>
+            <div class="cap-title">Atención 24/7 por WhatsApp</div>
+            <div class="cap-desc">Valentina responde instantáneamente cualquier consulta, a cualquier hora, cualquier día del año. Sin demoras, sin días libres.</div>
+            <div class="cap-tag">En producción ✓</div>
+        </div>
+        <div class="cap-card reveal" style="transition-delay:0.1s">
+            <div class="cap-icon">🔍</div>
+            <div class="cap-title">Detección inteligente de tratamiento</div>
+            <div class="cap-desc">Identifica automáticamente qué tratamiento busca el paciente a partir de su consulta en lenguaje natural, sin menús ni opciones.</div>
+            <div class="cap-tag">En producción ✓</div>
+        </div>
+        <div class="cap-card reveal" style="transition-delay:0.15s">
+            <div class="cap-icon">✅</div>
+            <div class="cap-title">Calificación con 3 preguntas personalizadas</div>
+            <div class="cap-desc">Hace exactamente 3 preguntas relevantes al tratamiento detectado, evalúa contraindicaciones y determina si el paciente puede realizarse el tratamiento.</div>
+            <div class="cap-tag">En producción ✓</div>
+        </div>
+        <div class="cap-card reveal" style="transition-delay:0.2s">
+            <div class="cap-icon">🚨</div>
+            <div class="cap-title">Detección de emergencias oftalmológicas</div>
+            <div class="cap-desc">Si el paciente describe pérdida súbita de visión, destellos, cortina en el campo visual, dolor ocular intenso o traumatismo, Valentina interrumpe el flujo normal y lo deriva a guardia de inmediato.</div>
+            <div class="cap-tag">En producción ✓</div>
+        </div>
+        <div class="cap-card reveal" style="transition-delay:0.25s">
+            <div class="cap-icon">📅</div>
+            <div class="cap-title">Agendamiento de turnos</div>
+            <div class="cap-desc">Ofrece la primera consulta disponible, recopila el nombre del paciente y su horario preferido, y registra el turno automáticamente en el panel de control.</div>
+            <div class="cap-tag">En producción ✓</div>
+        </div>
+        <div class="cap-card reveal" style="transition-delay:0.3s">
+            <div class="cap-icon">📊</div>
+            <div class="cap-title">Registro automático en panel de control</div>
+            <div class="cap-desc">Cada turno agendado se registra instantáneamente en el dashboard con nombre, teléfono, tratamiento, sucursal, horario y score de conversión.</div>
+            <div class="cap-tag">En producción ✓</div>
+        </div>
+
+        <div class="cap-card reveal" style="transition-delay:0.4s">
+            <div class="cap-icon">👩‍⚕️</div>
+            <div class="cap-title">Conocimiento del equipo profesional</div>
+            <div class="cap-desc">Conoce a los 4 directivos médicos (Dra. Oneto, Dra. Vargas Dohmen, Dr. Simondi, Dr. Busleimán) y los 8 especialistas del staff. Puede responder consultas sobre quién atiende qué especialidad.</div>
+            <div class="cap-tag">En producción ✓</div>
+        </div>
+        <div class="cap-card reveal" style="transition-delay:0.45s">
+            <div class="cap-icon">🎯</div>
+            <div class="cap-title">Score IA de cada paciente</div>
+            <div class="cap-desc">El panel asigna automáticamente un score (Alto / Medio / Bajo) a cada lead según el tipo de tratamiento y el estado de la consulta para priorizar el seguimiento.</div>
+            <div class="cap-tag">En producción ✓</div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGOS INTEGRADOS — MÓDULO PREMIUM -->
+<div class="premium-section">
+    <div class="section" style="padding:0; position:relative; z-index:1;">
+        <div class="reveal" style="text-align:center; margin-bottom:52px;">
+            <div class="payment-badge">⭐ Módulo Premium · Próximamente disponible</div>
+            <h2 class="section-title" style="font-size:clamp(28px,4vw,50px);">Valentina cobra.<br><span style="background:linear-gradient(135deg,#f59e0b,#fbbf24,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Sin que el paciente salga del chat.</span></h2>
+            <p class="section-sub" style="max-width:620px;margin:18px auto 0;">La integración con MercadoPago permite que Valentina detecte cuándo corresponde un cobro, genere el link de pago personalizado en el momento y confirme automáticamente cuando el pago se acredita — todo dentro de la misma conversación de WhatsApp.</p>
+        </div>
+
+        <!-- FLUJO DE COBRO -->
+        <div class="reveal">
+            <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f59e0b;margin-bottom:22px;text-align:center;">Flujo de cobro automático — 6 pasos sin intervención humana</div>
+            <div class="payment-flow">
+                <div class="payment-step">
+                    <div class="payment-num">1</div>
+                    <div style="font-size:20px;margin-bottom:8px;">📅</div>
+                    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;">Turno confirmado</div>
+                    <div style="font-size:10px;color:var(--muted);">Valentina agenda</div>
+                </div>
+                <div class="payment-step">
+                    <div class="payment-num">2</div>
+                    <div style="font-size:20px;margin-bottom:8px;">🩺</div>
+                    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;">Detecta cobertura</div>
+                    <div style="font-size:10px;color:var(--muted);">OS, coseguro o particular</div>
+                </div>
+                <div class="payment-step">
+                    <div class="payment-num">3</div>
+                    <div style="font-size:20px;margin-bottom:8px;">💳</div>
+                    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;">Genera link MP</div>
+                    <div style="font-size:10px;color:var(--muted);">Monto exacto + nombre</div>
+                </div>
+                <div class="payment-step">
+                    <div class="payment-num">4</div>
+                    <div style="font-size:20px;margin-bottom:8px;">📲</div>
+                    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;">Paciente paga</div>
+                    <div style="font-size:10px;color:var(--muted);">Desde WhatsApp · 30 seg</div>
+                </div>
+                <div class="payment-step">
+                    <div class="payment-num">5</div>
+                    <div style="font-size:20px;margin-bottom:8px;">✅</div>
+                    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;">Confirmación automática</div>
+                    <div style="font-size:10px;color:var(--muted);">Valentina avisa al paciente</div>
+                </div>
+                <div class="payment-step">
+                    <div class="payment-num">6</div>
+                    <div style="font-size:20px;margin-bottom:8px;">📊</div>
+                    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;">Registra en panel</div>
+                    <div style="font-size:10px;color:var(--muted);">"Pago confirmado" en Sheets</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ESCENARIOS -->
+        <div class="reveal" style="margin-top:56px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#f59e0b;margin-bottom:22px;text-align:center;">Valentina actúa diferente según cada situación</div>
+            <div class="scenarios-grid">
+                <div class="scenario-card">
+                    <div style="font-size:26px;margin-bottom:12px;">🏥</div>
+                    <div style="font-size:14px;font-weight:700;color:#fde68a;margin-bottom:8px;">Obra social con cobertura total</div>
+                    <div style="font-size:13px;color:var(--muted2);line-height:1.65;">Valentina confirma el turno directamente. No genera ningún link de pago. El panel registra el estado como <em>"Sin cargo"</em>.</div>
+                    <div style="margin-top:12px;font-size:12px;font-weight:600;color:#10b981;">→ Turno confirmado. Sin cobro.</div>
+                </div>
+                <div class="scenario-card">
+                    <div style="font-size:26px;margin-bottom:12px;">💰</div>
+                    <div style="font-size:14px;font-weight:700;color:#fde68a;margin-bottom:8px;">Obra social con coseguro</div>
+                    <div style="font-size:13px;color:var(--muted2);line-height:1.65;">Valentina detecta que la obra social requiere un pago adicional. Genera el link con el monto exacto del coseguro y lo envía en la misma conversación.</div>
+                    <div style="margin-top:12px;font-size:12px;font-weight:600;color:#fbbf24;">→ Link MP por el monto del coseguro.</div>
+                </div>
+                <div class="scenario-card">
+                    <div style="font-size:26px;margin-bottom:12px;">👤</div>
+                    <div style="font-size:14px;font-weight:700;color:#fde68a;margin-bottom:8px;">Paciente particular</div>
+                    <div style="font-size:13px;color:var(--muted2);line-height:1.65;">Sin obra social, Valentina genera el link con el arancel completo de la consulta. Una vez acreditado, confirma el turno automáticamente.</div>
+                    <div style="margin-top:12px;font-size:12px;font-weight:600;color:#fbbf24;">→ Link MP por consulta particular.</div>
+                </div>
+                <div class="scenario-card">
+                    <div style="font-size:26px;margin-bottom:12px;">👨‍⚕️</div>
+                    <div style="font-size:14px;font-weight:700;color:#fde68a;margin-bottom:8px;">Profesional con extra fijo</div>
+                    <div style="font-size:13px;color:var(--muted2);line-height:1.65;">Algunos médicos cobran un adicional independientemente de la obra social. Valentina detecta el profesional asignado y genera el link por ese monto específico.</div>
+                    <div style="margin-top:12px;font-size:12px;font-weight:600;color:#fbbf24;">→ Link MP por extra del profesional.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFO BOX -->
+        <div class="reveal" style="margin-top:52px;padding:28px 32px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:18px;display:flex;gap:20px;align-items:flex-start;">
+            <div style="font-size:32px;flex-shrink:0;">💡</div>
+            <div>
+                <div style="font-size:15px;font-weight:800;color:#fbbf24;margin-bottom:8px;">¿Qué necesita Centro de Ojos La Rioja para activar esta funcionalidad?</div>
+                <div style="font-size:13px;color:var(--muted2);line-height:1.75;">Solo es necesario contar con una <strong style="color:var(--text);">cuenta MercadoPago como vendedor</strong> y compartir el Access Token de la API. El resto — generación de links, webhook de confirmación y actualización automática del panel — ya está diseñado y listo para implementarse. Una vez activado, el sistema opera de forma completamente autónoma.</div>
+                <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+                    <div style="padding:5px 14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:11px;color:#fbbf24;font-weight:700;">MercadoPago API</div>
+                    <div style="padding:5px 14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:11px;color:#fbbf24;font-weight:700;">Webhooks automáticos</div>
+                    <div style="padding:5px 14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:11px;color:#fbbf24;font-weight:700;">30% menos abandonos</div>
+                    <div style="padding:5px 14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:11px;color:#fbbf24;font-weight:700;">Registro automático en panel</div>
+                    <div style="padding:5px 14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:11px;color:#fbbf24;font-weight:700;">Cero intervención humana</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FLUJO COMPLETO -->
+<div style="background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:80px 32px;">
+    <div class="section" style="padding:0;">
+        <div class="reveal" style="text-align:center; margin-bottom:48px;">
+            <div class="section-tag">Flujo completo</div>
+            <h2 class="section-title">De la consulta al turno<br>en menos de 3 minutos</h2>
+        </div>
+        <div class="flow-steps reveal" style="gap:12px;">
+            <div class="flow-step">
+                <div class="flow-num">1</div>
+                <div class="flow-icon">📱</div>
+                <div class="flow-label">Paciente escribe</div>
+                <div class="flow-time">0 seg</div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">2</div>
+                <div class="flow-icon">👋</div>
+                <div class="flow-label">Valentina saluda</div>
+                <div class="flow-time">&lt; 3 seg</div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">3</div>
+                <div class="flow-icon">🔍</div>
+                <div class="flow-label">Detecta tratamiento</div>
+                <div class="flow-time">automático</div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">4</div>
+                <div class="flow-icon">❓</div>
+                <div class="flow-label">3 preguntas</div>
+                <div class="flow-time">~2 min</div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">5</div>
+                <div class="flow-icon">⚖️</div>
+                <div class="flow-label">Evalúa perfil</div>
+                <div class="flow-time">automático</div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">6</div>
+                <div class="flow-icon">📅</div>
+                <div class="flow-label">Agenda turno</div>
+                <div class="flow-time">~30 seg</div>
+            </div>
+            <div class="flow-step">
+                <div class="flow-num">7</div>
+                <div class="flow-icon">✅</div>
+                <div class="flow-label">Registra en panel</div>
+                <div class="flow-time">automático</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CONOCIMIENTO DEL AGENTE -->
+<div class="section">
+    <div class="reveal">
+        <div class="section-tag">Base de conocimiento</div>
+        <h2 class="section-title">Todo lo que<br>Valentina sabe</h2>
+        <p class="section-sub">Valentina está entrenada con información real de Centro de Ojos La Rioja para responder con precisión y calidez.</p>
+    </div>
+    <div class="knowledge-grid">
+        <div class="know-card reveal">
+            <div class="know-icon">💆</div>
+            <div>
+                <div class="know-title">15+ patologías y cirugías</div>
+                <div class="know-items">Cataratas · Glaucoma · Miopía · Hipermetropía · Astigmatismo · Presbicia · Queratocono · Retina · Ojo seco · Párpados · y más</div>
+            </div>
+        </div>
+        <div class="know-card reveal">
+            <div class="know-icon">📍</div>
+            <div>
+                <div class="know-title">Sede y horarios</div>
+                <div class="know-items">Urquiza 969, La Rioja · Lunes a viernes 8–13 y 16–21 · Sábados 9:30–12 · Domingos cerrado</div>
+            </div>
+        </div>
+        <div class="know-card reveal">
+            <div class="know-icon">👩‍⚕️</div>
+            <div>
+                <div class="know-title">Equipo médico completo</div>
+                <div class="know-items">Dra. Oneto · Dra. Vargas Dohmen · Dr. Simondi · Dr. Busleimán · Carolina Ruíz · M. Barboni · B. Figueroa · H. Díaz Carreño · G. Nieto · y más</div>
+            </div>
+        </div>
+        <div class="know-card reveal">
+            <div class="know-icon">🔬</div>
+            <div>
+                <div class="know-title">Tecnología de vanguardia</div>
+                <div class="know-items">IOL Master · OCT · Topógrafo corneal · HD Analyser · Excimer Láser · YAG Láser · SLT · Campímetro · 3 quirófanos equipados</div>
+            </div>
+        </div>
+        <div class="know-card reveal">
+            <div class="know-icon">⚠️</div>
+            <div>
+                <div class="know-title">Contraindicaciones</div>
+                <div class="know-items">Embarazo · Marcapasos · Trombosis · Cáncer activo · Cirugía reciente — Derivación empática con alternativas</div>
+            </div>
+        </div>
+        <div class="know-card reveal">
+            <div class="know-icon">🌿</div>
+            <div>
+                <div class="know-title">Identidad de marca</div>
+                <div class="know-items">Español rioplatense · Tono cálido y profesional · Moderación en emojis · Sin diagnósticos médicos · Sello Centro de Ojos La Rioja</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- UPSELLS -->
+<div class="section">
+    <div class="reveal">
+        <div class="section-tag">Próximas capacidades</div>
+        <h2 class="section-title">Lo que se puede sumar<br>cuando Centro de Ojos La Rioja lo necesite</h2>
+        <p class="section-sub">Módulos adicionales que se activan sobre el sistema actual sin interrumpir su funcionamiento.</p>
+    </div>
+    <div class="upsell-grid">
+        <div class="upsell-card reveal" style="transition-delay:0.05s">
+            <div class="upsell-badge">Upsell</div>
+            <div class="upsell-icon">🗂️</div>
+            <div class="upsell-title">CRM propio integrado en el dashboard</div>
+            <div class="upsell-desc">El dashboard reemplaza Google Sheets como base de datos. Estados editables por paciente (Pendiente → Confirmado → Atendido), historial completo y notas internas — todo desde el panel.</div>
+            <div class="upsell-price">Incluido en Plan <strong>Pro+</strong></div>
+        </div>
+        <div class="upsell-card reveal" style="transition-delay:0.08s">
+            <div class="upsell-badge">Upsell</div>
+            <div class="upsell-icon">📆</div>
+            <div class="upsell-title">Google Calendar integrado</div>
+            <div class="upsell-desc">Valentina consulta disponibilidad real en el calendario antes de ofrecer un turno. No más solapamientos ni gestión manual.</div>
+            <div class="upsell-price">Incluido en Plan <strong>Pro+</strong></div>
+        </div>
+        <div class="upsell-card reveal" style="transition-delay:0.09s">
+            <div class="upsell-badge">Upsell</div>
+            <div class="upsell-icon">🔗</div>
+            <div class="upsell-title">Conexión con tu sistema de agenda actual</div>
+            <div class="upsell-desc">Si el cliente ya usa Reservo, Turnos.io, SimplyBook u otro sistema con API, Valentina se conecta directamente. Los turnos se agendan en el sistema existente sin que el equipo cambie nada de su flujo actual.</div>
+            <div class="upsell-price">Incluido en Plan <strong>Pro+</strong> · A consultar según plataforma</div>
+        </div>
+        <div class="upsell-card reveal" style="transition-delay:0.1s">
+            <div class="upsell-badge">Upsell</div>
+            <div class="upsell-icon">🔔</div>
+            <div class="upsell-title">Recordatorio automático 24hs antes</div>
+            <div class="upsell-desc">El día antes del turno, Valentina envía un recordatorio automático al paciente por WhatsApp. Reduce ausencias y cancellaciones.</div>
+            <div class="upsell-price">Incluido en Plan <strong>Pro+</strong></div>
+        </div>
+        <div class="upsell-card reveal" style="transition-delay:0.15s">
+            <div class="upsell-badge">Upsell</div>
+            <div class="upsell-icon">📣</div>
+            <div class="upsell-title">Campañas WhatsApp a pacientes que no confirmaron</div>
+            <div class="upsell-desc">Desde el dashboard seleccionás los pacientes que no confirmaron y Valentina les escribe automáticamente para reactivarlos.</div>
+            <div class="upsell-price">Incluido en Plan <strong>Enterprise</strong></div>
+        </div>
+        <div class="upsell-card reveal" style="transition-delay:0.2s">
+            <div class="upsell-badge">Upsell</div>
+            <div class="upsell-icon">👥</div>
+            <div class="upsell-title">Bandeja multiusuario del equipo</div>
+            <div class="upsell-desc">Todo el equipo de secretaría ve las conversaciones activas desde un panel compartido. Pueden intervenir cuando Valentina escala la consulta.</div>
+            <div class="upsell-price">Incluido en Plan <strong>Enterprise</strong></div>
+        </div>
+        <div class="upsell-card reveal" style="transition-delay:0.25s">
+            <div class="upsell-badge">Upsell</div>
+            <div class="upsell-icon">🎤</div>
+            <div class="upsell-title">Transcripción de mensajes de voz</div>
+            <div class="upsell-desc">Si el paciente manda un audio, Valentina lo transcribe automáticamente y responde como si hubiera sido texto. Nada se pierde.</div>
+            <div class="upsell-price">A consultar</div>
+        </div>
+        <div class="upsell-card reveal" style="transition-delay:0.3s">
+            <div class="upsell-badge">Upsell</div>
+            <div class="upsell-icon">📸</div>
+            <div class="upsell-title">Respuesta con imágenes</div>
+            <div class="upsell-desc">Valentina puede enviar fotos de resultados, instalaciones o tratamientos al paciente durante la conversación para reforzar la decisión.</div>
+            <div class="upsell-price">A consultar</div>
+        </div>
+    </div>
+</div>
+
+<!-- STACK TECNOLÓGICO -->
+<div style="background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:80px 32px;">
+    <div class="section" style="padding:0;">
+        <div class="reveal" style="text-align:center; margin-bottom:48px;">
+            <div class="section-tag">Tecnología</div>
+            <h2 class="section-title">El stack que hace<br>funcionar a Valentina</h2>
+        </div>
+        <div class="stack-grid">
+            <div class="stack-item reveal">
+                <div class="stack-emoji">🧠</div>
+                <div class="stack-name">Gemini 2.5 Flash</div>
+                <div class="stack-role">Motor de IA · Google</div>
+                <div class="stack-status">Activo ✓</div>
+            </div>
+            <div class="stack-item reveal" style="transition-delay:0.08s">
+                <div class="stack-emoji">📱</div>
+                <div class="stack-name">Twilio WhatsApp</div>
+                <div class="stack-role">Canal de mensajería</div>
+                <div class="stack-status">Activo ✓</div>
+            </div>
+            <div class="stack-item reveal" style="transition-delay:0.16s">
+                <div class="stack-emoji">☁️</div>
+                <div class="stack-name">Railway</div>
+                <div class="stack-role">Servidor 24/7 en la nube</div>
+                <div class="stack-status">Activo ✓</div>
+            </div>
+            <div class="stack-item reveal" style="transition-delay:0.24s">
+                <div class="stack-emoji">📊</div>
+                <div class="stack-name">Google Sheets</div>
+                <div class="stack-role">Base de datos de leads</div>
+                <div class="stack-status">Activo ✓</div>
+            </div>
+            <div class="stack-item reveal" style="transition-delay:0.32s">
+                <div class="stack-emoji">🖥️</div>
+                <div class="stack-name">Dashboard Web</div>
+                <div class="stack-role">Panel de control · Hostinger</div>
+                <div class="stack-status">Activo ✓</div>
+            </div>
+            <div class="stack-item reveal" style="transition-delay:0.40s;border-color:rgba(245,158,11,0.28);">
+                <div class="stack-emoji">💳</div>
+                <div class="stack-name">MercadoPago</div>
+                <div class="stack-role">Cobro automático · API</div>
+                <div class="stack-status" style="background:rgba(245,158,11,0.1);color:#fbbf24;border:1px solid rgba(245,158,11,0.2);">Próximamente ⭐</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HOJA DE RUTA -->
+<div class="section">
+    <div class="reveal">
+        <div class="section-tag">Hoja de ruta</div>
+        <h2 class="section-title">De la demo al número<br>propio de Centro de Ojos La Rioja</h2>
+        <p class="section-sub">El sistema ya está funcionando. Lo que viene es pasar del modo prueba al número real de WhatsApp del centro.</p>
+    </div>
+
+    <div style="margin-top:52px; display:flex; flex-direction:column; gap:0;">
+
+        <!-- ETAPA 1 -->
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:0; position:relative;" class="reveal">
+            <div style="display:flex; flex-direction:column; align-items:center; padding-top:4px;">
+                <div style="width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,#0a8a93,#0d9da6); display:flex; align-items:center; justify-content:center; font-size:20px; z-index:1; position:relative;">✅</div>
+                <div style="width:2px; flex:1; background:linear-gradient(180deg,#0d9da6,rgba(13,157,166,0.15)); margin-top:4px;"></div>
+            </div>
+            <div style="padding:0 0 48px 28px;">
+                <div style="display:inline-block; padding:3px 12px; background:rgba(13,157,166,0.12); color:#2dd4cc; border:1px solid rgba(13,157,166,0.2); border-radius:100px; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:10px;">HOY — ACTIVO</div>
+                <div style="font-size:20px; font-weight:800; margin-bottom:10px;">Modo Demo — Twilio Sandbox</div>
+                <div style="font-size:14px; color:var(--muted2); line-height:1.75; max-width:580px;">
+                    Valentina ya está funcionando 24/7 en la nube. En este modo, hasta <strong style="color:var(--text);">5 personas</strong> pueden probarla enviando el mensaje <code style="background:var(--surface2); padding:2px 8px; border-radius:6px; font-size:13px;">join [palabra-clave]</code> al número de Twilio. Ideal para que el equipo de Centro de Ojos La Rioja pruebe el agente antes de la implementación definitiva.<br><br>
+                    <span style="color:#2dd4cc; font-weight:600;">Panel de control online · Registro en Sheets · Calificación real · Emergencias oftalmológicas · Equipo médico</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ETAPA 2 -->
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:0; position:relative;" class="reveal">
+            <div style="display:flex; flex-direction:column; align-items:center; padding-top:4px;">
+                <div style="width:52px; height:52px; border-radius:50%; background:var(--surface2); border:2px solid rgba(27,117,188,0.4); display:flex; align-items:center; justify-content:center; font-size:20px; z-index:1; position:relative;">🏢</div>
+                <div style="width:2px; flex:1; background:linear-gradient(180deg,rgba(27,117,188,0.4),rgba(27,117,188,0.1)); margin-top:4px;"></div>
+            </div>
+            <div style="padding:0 0 48px 28px;">
+                <div style="display:inline-block; padding:3px 12px; background:rgba(27,117,188,0.1); color:#60a5fa; border:1px solid rgba(27,117,188,0.2); border-radius:100px; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:10px;">PASO 1 — ~3 días hábiles</div>
+                <div style="font-size:20px; font-weight:800; margin-bottom:10px;">Crear Facebook Business Manager</div>
+                <div style="font-size:14px; color:var(--muted2); line-height:1.75; max-width:580px;">
+                    El primer paso hacia la producción real es crear una cuenta en <strong style="color:var(--text);">Meta Business Manager</strong> con los datos de Centro de Ojos La Rioja y verificar el negocio con documentación oficial. Meta revisa la cuenta y la aprueba en <strong style="color:var(--text);">2 a 5 días hábiles</strong>.
+                </div>
+            </div>
+        </div>
+
+        <!-- ETAPA 3 -->
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:0; position:relative;" class="reveal">
+            <div style="display:flex; flex-direction:column; align-items:center; padding-top:4px;">
+                <div style="width:52px; height:52px; border-radius:50%; background:var(--surface2); border:2px solid rgba(27,117,188,0.3); display:flex; align-items:center; justify-content:center; font-size:20px; z-index:1; position:relative;">📱</div>
+                <div style="width:2px; flex:1; background:linear-gradient(180deg,rgba(27,117,188,0.2),rgba(13,157,166,0.15)); margin-top:4px;"></div>
+            </div>
+            <div style="padding:0 0 48px 28px;">
+                <div style="display:inline-block; padding:3px 12px; background:rgba(27,117,188,0.1); color:#60a5fa; border:1px solid rgba(27,117,188,0.2); border-radius:100px; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:10px;">PASO 2 — ~1 a 2 semanas</div>
+                <div style="font-size:20px; font-weight:800; margin-bottom:10px;">Migración del número de WhatsApp</div>
+                <div style="font-size:14px; color:var(--muted2); line-height:1.75; max-width:580px;">
+                    Con Business Manager verificado, se inicia la migración del número actual de Centro de Ojos La Rioja a <strong style="color:var(--text);">WhatsApp Business API</strong>. Durante el proceso, Meta envía un código de verificación al número. Una vez completado, ese mismo número pasa a ser el canal oficial del agente.<br><br>
+                    <span style="color:#fbbf24; font-weight:600;">⚠ Período de inactividad real: entre 15 minutos y 2 horas.</span><br><br>
+                    <span style="color:var(--muted2); font-size:13px;">Meta envía un código SMS o llamada al número. Una vez ingresado en el panel, el número queda activo con el agente. El resto del trámite (Business Manager, verificación) se gestiona en paralelo sin afectar el funcionamiento del número. Se recomienda programar este paso en horario de baja actividad — por ejemplo un domingo a las 8am — para minimizar el impacto.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ETAPA 4 -->
+        <div style="display:grid; grid-template-columns:180px 1fr; gap:0;" class="reveal">
+            <div style="display:flex; flex-direction:column; align-items:center; padding-top:4px;">
+                <div style="width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,#0a8a93,#0d9da6); display:flex; align-items:center; justify-content:center; font-size:20px;">🚀</div>
+            </div>
+            <div style="padding:0 0 0 28px;">
+                <div style="display:inline-block; padding:3px 12px; background:rgba(13,157,166,0.12); color:#2dd4cc; border:1px solid rgba(13,157,166,0.2); border-radius:100px; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:10px;">RESULTADO FINAL</div>
+                <div style="font-size:20px; font-weight:800; margin-bottom:10px;">Valentina con el número propio de Centro de Ojos La Rioja</div>
+                <div style="font-size:14px; color:var(--muted2); line-height:1.75; max-width:580px;">
+                    Sin límite de usuarios. Sin palabra clave. Cualquier paciente que escriba directamente al número de Centro de Ojos La Rioja será atendido por Valentina de forma inmediata y profesional — exactamente igual que hoy en el demo, pero a escala real.
+                </div>
+                <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
+                    <div style="padding:8px 16px; background:var(--green-dim); border:1px solid rgba(13,157,166,0.2); border-radius:10px; font-size:13px; color:#2dd4cc; font-weight:600;">Sin límite de conversaciones</div>
+                    <div style="padding:8px 16px; background:var(--green-dim); border:1px solid rgba(13,157,166,0.2); border-radius:10px; font-size:13px; color:#2dd4cc; font-weight:600;">Número propio del centro</div>
+                    <div style="padding:8px 16px; background:var(--green-dim); border:1px solid rgba(13,157,166,0.2); border-radius:10px; font-size:13px; color:#2dd4cc; font-weight:600;">Sistema idéntico al demo</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div style="margin-top:48px; padding:24px 28px; background:var(--surface); border:1px solid rgba(13,157,166,0.15); border-radius:16px; display:flex; gap:16px; align-items:flex-start;" class="reveal">
+        <div style="font-size:24px;">💡</div>
+        <div>
+            <div style="font-size:14px; font-weight:700; margin-bottom:6px;">Estrategia recomendada</div>
+            <div style="font-size:13px; color:var(--muted2); line-height:1.7;">Mientras se gestiona la aprobación de Meta (que puede tomar 2-3 semanas en total), podemos ir trabajando en paralelo en afinar el System Prompt con los datos reales de Centro de Ojos La Rioja, actualizar el panel de control y preparar el lanzamiento. Así el día que llegue la aprobación, el sistema ya está 100% listo.</div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-wrap reveal">
+    <h2>¿Querés ver Valentina<br>en acción?</h2>
+    <p>Agendá una demo en vivo y mostramos el sistema funcionando con los datos reales de Centro de Ojos La Rioja.</p>
+    <a href="https://wa.me/3804298707" class="wa-btn" target="_blank">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.859L.057 23.25a.75.75 0 00.918.943l5.444-1.432A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.713 9.713 0 01-4.95-1.354l-.355-.21-3.676.966.983-3.588-.23-.369A9.711 9.711 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+        Contactar a Kyrios Comunicación por WhatsApp
+    </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-kyrios">
+        <svg width="22" height="22" viewBox="0 0 500 500" fill="none">
+            <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#1B75BC"/>
+            <text x="185" y="295" font-family="Arial Black,sans-serif" font-weight="900" font-size="230" fill="white">K</text>
+        </svg>
+        <span style="font-weight:800;font-size:12px;letter-spacing:2px;color:#1B75BC;">KYRIOS</span>
+        <span style="font-size:10px;color:var(--muted);letter-spacing:1px;">COMUNICACIÓN</span>
+    </div>
+    <div style="font-size:11px;color:var(--muted);">Guía de Capacidades — Valentina IA · Centro de Ojos La Rioja · Julio 2026</div>
+    <div style="font-size:11px;color:var(--muted);">© 2026 Kyrios Comunicación · Todos los derechos reservados</div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+</script>
+</body>
+</html>

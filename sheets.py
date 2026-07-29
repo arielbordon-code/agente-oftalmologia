@@ -24,6 +24,7 @@ HEADERS = [
     "Motivo de consulta",
     "Sede",
     "Horario preferido",
+    "Score IA",
     "Estado",
 ]
 
@@ -48,6 +49,26 @@ def get_sheet():
     return get_client().open_by_key(SHEET_ID).sheet1
 
 
+def calcular_score(tratamiento: str) -> str:
+    """Asigna score IA según el tipo de tratamiento detectado."""
+    t = tratamiento.lower()
+    keywords_alto = [
+        "cirugía", "cirugia", "catarata", "retina", "glaucoma", "queratocono",
+        "láser", "laser", "crosslinking", "vitrectomía", "vitrectomia",
+        "desprendimiento", "trasplante", "refractiva", "miopía", "miopia",
+        "hipermetropía", "hipermetropia", "astigmatismo", "presbicia",
+        "lente intraocular", "pterigion", "dacriocistitis", "urgencia", "emergencia",
+    ]
+    keywords_bajo = [
+        "información", "informacion", "precio", "costo", "duda", "pregunta", "consulta general",
+    ]
+    if any(k in t for k in keywords_alto):
+        return "Alto"
+    elif any(k in t for k in keywords_bajo):
+        return "Bajo"
+    return "Medio"
+
+
 def setup_formato():
     """Aplica diseño visual completo al Sheet."""
     client = get_client()
@@ -56,16 +77,16 @@ def setup_formato():
 
     sheet.update_title("Leads WhatsApp")
 
-    sheet.update("A1:G1", [["Centro de Ojos La Rioja — Pacientes WhatsApp"] + [""] * 6])
-    sheet.merge_cells("A1:G1")
-    format_cell_range(sheet, "A1:G1", CellFormat(
+    sheet.update("A1:H1", [["Centro de Ojos La Rioja — Pacientes WhatsApp"] + [""] * 7])
+    sheet.merge_cells("A1:H1")
+    format_cell_range(sheet, "A1:H1", CellFormat(
         backgroundColor=COLOR_TITULO,
         textFormat=TextFormat(bold=True, fontSize=14, foregroundColor=COLOR_BLANCO),
         horizontalAlignment="CENTER",
     ))
 
-    sheet.update("A2:G2", [HEADERS])
-    format_cell_range(sheet, "A2:G2", CellFormat(
+    sheet.update("A2:H2", [HEADERS])
+    format_cell_range(sheet, "A2:H2", CellFormat(
         backgroundColor=COLOR_VERDE,
         textFormat=TextFormat(bold=True, fontSize=11, foregroundColor=COLOR_BLANCO),
         horizontalAlignment="CENTER",
@@ -81,7 +102,7 @@ def setup_formato():
                 "properties": {"pixelSize": ancho},
                 "fields": "pixelSize"
             }}
-            for i, ancho in enumerate([150, 180, 180, 220, 200, 160, 160])
+            for i, ancho in enumerate([150, 180, 180, 220, 200, 160, 100, 160])
         ]
     }
     spreadsheet.batch_update(body)
@@ -91,7 +112,7 @@ def setup_formato():
 
 def _aplicar_color_fila(sheet, fila_num: int):
     color = COLOR_FILA_PAR if fila_num % 2 == 0 else COLOR_BLANCO
-    rango = f"A{fila_num}:G{fila_num}"
+    rango = f"A{fila_num}:H{fila_num}"
     format_cell_range(sheet, rango, CellFormat(backgroundColor=color))
 
 
@@ -99,6 +120,7 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
                    sucursal: str = "", horario: str = ""):
     """Registra un lead calificado en el Sheet."""
     print(f"[Sheets] Intentando registrar: {nombre} | {tratamiento} | {horario}")
+    score = calcular_score(tratamiento)
     fila = [
         datetime.now().strftime("%d/%m/%Y %H:%M"),
         telefono,
@@ -106,6 +128,7 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
         tratamiento,
         sucursal,
         horario,
+        score,
         "Pendiente confirmar",
     ]
 
