@@ -48,15 +48,14 @@ header {
 .hero-tag { display:inline-flex; align-items:center; gap:8px; background:var(--green-dim); border:1px solid rgba(13,157,166,0.22); color:var(--green); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:6px 18px; border-radius:100px; margin-bottom:28px; animation:fadeUp 0.7s ease forwards; }
 .live-dot { width:6px; height:6px; background:var(--green); border-radius:50%; animation:blink 2s infinite; }
 .hero h1 { font-size:clamp(32px,5.5vw,64px); font-weight:900; line-height:1.08; animation:fadeUp 0.8s 0.1s ease forwards; opacity:0; }
-.hero h1 em { font-style:normal; background:linear-gradient(135deg,#0d9da6,#2dd4cc,#6ee7e7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero h1 em { font-style:normal; color:#2dd4cc; }
 .hero-sub { font-size:17px; color:var(--muted2); max-width:580px; margin:18px auto 0; line-height:1.7; animation:fadeUp 0.8s 0.22s ease forwards; opacity:0; }
 
 .valentina-avatar {
     width:100px; height:100px; border-radius:50%; margin:0 auto 32px;
     background:linear-gradient(135deg,#0a8a93,#0d9da6,#2dd4cc);
     display:flex; align-items:center; justify-content:center; font-size:40px;
-    animation:float 4s ease-in-out infinite, glow 3s ease-in-out infinite;
-    animation:fadeUp 0.7s ease forwards, float 4s 0.8s ease-in-out infinite;
+    animation:fadeUp 0.7s ease forwards, float 4s 0.8s ease-in-out infinite, glow 3s 0.8s ease-in-out infinite;
 }
 
 /* SECTIONS */
@@ -211,9 +210,110 @@ footer { background:#050810; border-top:1px solid var(--border); padding:28px 48
     .flow-step:not(:last-child)::after { content:'↓'; right:auto; top:auto; bottom:-14px; left:50%; transform:translateX(-50%); }
     footer { flex-direction:column; text-align:center; padding:20px; }
 }
+
+/* ===== ENHANCEMENTS ===== */
+
+/* Scroll progress bar */
+#scroll-progress {
+    position:fixed; top:0; left:0; z-index:200;
+    height:2px; width:0%;
+    background:linear-gradient(90deg,#0a8a93,#2dd4cc);
+    transition:width 0.08s linear;
+    pointer-events:none;
+}
+
+/* Header scroll state */
+header { transition:background 0.3s, box-shadow 0.3s; }
+header.scrolled {
+    background:rgba(8,13,26,0.97);
+    box-shadow:0 1px 0 rgba(13,157,166,0.12), 0 4px 24px rgba(0,0,0,0.4);
+}
+
+/* Typography */
+h1,h2,h3 { text-wrap:balance; }
+.hero h1 { letter-spacing:-0.03em; }
+.section-title { letter-spacing:-0.02em; }
+.section-sub { text-wrap:pretty; }
+
+/* Improved reveal */
+.reveal { opacity:0; transform:translateY(22px) scale(0.985); }
+.reveal.visible {
+    opacity:1; transform:none;
+    transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* Bento cap-grid: break the identical-card pattern */
+@media(min-width:960px) {
+    .cap-grid { grid-template-columns:repeat(3,1fr); }
+    .cap-card:nth-child(1) { grid-column:span 2; }
+    .cap-card:nth-child(6) { grid-column:span 2; }
+    .cap-card:nth-child(1) .cap-icon,
+    .cap-card:nth-child(6) .cap-icon { font-size:36px; }
+    .cap-card:nth-child(1) .cap-title,
+    .cap-card:nth-child(6) .cap-title { font-size:18px; }
+}
+
+/* Cap-card hover upgrade */
+.cap-card { transition:transform 0.35s cubic-bezier(0.16,1,0.3,1), border-color 0.35s, box-shadow 0.35s; }
+.cap-card:hover { transform:translateY(-6px); border-color:rgba(13,157,166,0.3); box-shadow:0 20px 56px rgba(13,157,166,0.1); }
+.cap-icon { display:inline-block; transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1), filter 0.35s; }
+.cap-card:hover .cap-icon { transform:scale(1.2) rotate(-5deg); filter:drop-shadow(0 0 10px rgba(13,157,166,0.65)); }
+
+/* Know-card hover upgrade */
+.know-card { transition:transform 0.3s cubic-bezier(0.16,1,0.3,1), background 0.3s, border-color 0.3s; }
+.know-card:hover { transform:translateY(-4px); background:#1f3050; border-color:rgba(13,157,166,0.2); }
+.know-icon { transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+.know-card:hover .know-icon { transform:scale(1.25); }
+
+/* Stack-item hover upgrade */
+.stack-item { transition:transform 0.35s cubic-bezier(0.16,1,0.3,1), border-color 0.35s, box-shadow 0.35s; }
+.stack-item:hover { transform:translateY(-5px); border-color:rgba(13,157,166,0.28); box-shadow:0 16px 40px rgba(13,157,166,0.08); }
+.stack-emoji { display:inline-block; transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+.stack-item:hover .stack-emoji { transform:scale(1.3) rotate(8deg); }
+
+/* Upsell-card hover upgrade */
+.upsell-card { transition:transform 0.35s cubic-bezier(0.16,1,0.3,1), border-color 0.35s, box-shadow 0.35s; }
+.upsell-card:hover { transform:translateY(-6px); box-shadow:0 20px 56px rgba(27,117,188,0.1); }
+.upsell-icon { display:inline-block; transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+.upsell-card:hover .upsell-icon { transform:scale(1.18) translateY(-3px); }
+
+/* Flow-step hover upgrade */
+.flow-step { transition:transform 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s, background 0.3s; }
+.flow-step:hover { transform:translateY(-4px); background:var(--surface2); }
+.flow-num { transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s; }
+.flow-step:hover .flow-num { transform:scale(1.15); box-shadow:0 0 16px rgba(13,157,166,0.5); }
+
+/* Payment-step hover */
+.payment-step { transition:transform 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s, background 0.3s; }
+.payment-step:hover { background:rgba(245,158,11,0.08); }
+.payment-num { transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+.payment-step:hover .payment-num { transform:scale(1.15); }
+
+/* Scenario-card hover */
+.scenario-card { transition:transform 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s, background 0.3s; }
+.scenario-card:hover { transform:translateY(-4px); background:rgba(245,158,11,0.08); border-color:rgba(245,158,11,0.28); }
+
+/* CTA button shimmer */
+.wa-btn { position:relative; overflow:hidden; transition:transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s; }
+.wa-btn::after {
+    content:''; position:absolute; top:0; left:-80%;
+    width:55%; height:100%; pointer-events:none;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.28),transparent);
+    transform:skewX(-18deg);
+}
+.wa-btn:hover::after { animation:shimmer 0.65s ease forwards; }
+.wa-btn:hover { transform:translateY(-4px); box-shadow:0 16px 48px rgba(37,211,102,0.45); }
+@keyframes shimmer { to { left:140%; } }
+
+/* Reduced motion — safety net */
+@media(prefers-reduced-motion:reduce) {
+    *,*::before,*::after { animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+    .reveal { opacity:1; transform:none; }
+}
 </style>
 </head>
 <body>
+<div id="scroll-progress"></div>
 
 <!-- HEADER -->
 <header>
@@ -304,7 +404,7 @@ footer { background:#050810; border-top:1px solid var(--border); padding:28px 48
     <div class="section" style="padding:0; position:relative; z-index:1;">
         <div class="reveal" style="text-align:center; margin-bottom:52px;">
             <div class="payment-badge">⭐ Módulo Premium · Próximamente disponible</div>
-            <h2 class="section-title" style="font-size:clamp(28px,4vw,50px);">Valentina cobra.<br><span style="background:linear-gradient(135deg,#f59e0b,#fbbf24,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Sin que el paciente salga del chat.</span></h2>
+            <h2 class="section-title" style="font-size:clamp(28px,4vw,50px);">Valentina cobra.<br><span style="color:#fbbf24;">Sin que el paciente salga del chat.</span></h2>
             <p class="section-sub" style="max-width:620px;margin:18px auto 0;">La integración con MercadoPago permite que Valentina detecte cuándo corresponde un cobro, genere el link de pago personalizado en el momento y confirme automáticamente cuando el pago se acredita — todo dentro de la misma conversación de WhatsApp.</p>
         </div>
 
@@ -504,6 +604,59 @@ footer { background:#050810; border-top:1px solid var(--border); padding:28px 48
                 <div class="know-items">Español rioplatense · Tono cálido y profesional · Moderación en emojis · Sin diagnósticos médicos · Sello Centro de Ojos La Rioja</div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- INTEGRACIONES -->
+<div style="background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:80px 32px;">
+    <div class="section" style="padding:0;">
+
+        <div class="reveal" style="text-align:center; margin-bottom:52px;">
+            <div style="display:inline-block; padding:6px 18px; background:rgba(13,157,166,0.1); border:1px solid rgba(13,157,166,0.22); color:var(--green); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border-radius:100px; margin-bottom:18px;">Integración con sistemas existentes</div>
+            <h2 class="section-title">Valentina no reemplaza<br>lo que ya funciona. Lo amplifica.</h2>
+            <p class="section-sub" style="margin:14px auto 0; text-align:center;">Centro de Ojos La Rioja ya tiene sistemas de gestión. Valentina se conecta a ellos y agrega inteligencia conversacional desde WhatsApp — sin que el equipo cambie su flujo de trabajo.</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin-bottom:40px;">
+
+            <div class="cap-card reveal" style="border-color:rgba(13,157,166,0.15);">
+                <div class="cap-icon">📅</div>
+                <div class="cap-title">Sistema de turnos</div>
+                <div class="cap-desc">Valentina consulta disponibilidad en tiempo real en el sistema que ya usa la clínica y agenda el turno directamente — sin solapamientos, sin que el personal intervenga.</div>
+                <div style="margin-top:14px; padding:8px 12px; background:var(--surface2); border-radius:8px; font-size:11px; color:var(--green);">Reservo · Doctoralia · SimplyBook · Sistema propio con API</div>
+            </div>
+
+            <div class="cap-card reveal" style="border-color:rgba(13,157,166,0.15); transition-delay:0.07s;">
+                <div class="cap-icon">📋</div>
+                <div class="cap-title">Historia clínica digital</div>
+                <div class="cap-desc">Valentina identifica al paciente por su número de WhatsApp y puede consultar su historial — último turno, estudios previos, médico tratante — para personalizar la atención desde el primer mensaje.</div>
+                <div style="margin-top:14px; padding:8px 12px; background:var(--surface2); border-radius:8px; font-size:11px; color:var(--green);">Compatible con sistemas de HC digital con API REST</div>
+            </div>
+
+            <div class="cap-card reveal" style="border-color:rgba(13,157,166,0.15); transition-delay:0.14s;">
+                <div class="cap-icon">🔬</div>
+                <div class="cap-title">Entrega de estudios</div>
+                <div class="cap-desc">Cuando un OCT, topografía corneal, campo visual o biometría está listo, Valentina avisa al paciente por WhatsApp y le envía el link de descarga — sin intervención manual del equipo.</div>
+                <div style="margin-top:14px; padding:8px 12px; background:var(--surface2); border-radius:8px; font-size:11px; color:var(--green);">Estudio listo → notificación automática al paciente</div>
+            </div>
+
+            <div class="cap-card reveal" style="border-color:rgba(13,157,166,0.15); transition-delay:0.21s;">
+                <div class="cap-icon">🏥</div>
+                <div class="cap-title">Obras sociales y coberturas</div>
+                <div class="cap-desc">Valentina puede consultar si la obra social del paciente cubre el procedimiento, informar el coseguro y — con MercadoPago integrado — procesarlo dentro del mismo chat de WhatsApp.</div>
+                <div style="margin-top:14px; padding:8px 12px; background:var(--surface2); border-radius:8px; font-size:11px; color:var(--green);">Consulta de cobertura + cobro de coseguro en un solo chat</div>
+            </div>
+
+        </div>
+
+        <div class="reveal" style="padding:22px 28px; background:rgba(13,157,166,0.05); border:1px solid rgba(13,157,166,0.14); border-radius:14px; display:flex; gap:16px; align-items:flex-start;">
+            <span style="font-size:20px; flex-shrink:0;">💡</span>
+            <div>
+                <div style="font-size:14px; font-weight:700; margin-bottom:6px;">¿El sistema de la clínica no tiene API?</div>
+                <div style="font-size:13px; color:var(--muted2); line-height:1.7;">No es un obstáculo. Evaluamos alternativas como webhooks, middleware o integración custom según el software que use Centro de Ojos La Rioja. La viabilidad se confirma en el onboarding, sin costo adicional de consultoría.</div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -710,6 +863,69 @@ footer { background:#050810; border-top:1px solid var(--border); padding:28px 48
     </div>
 </div>
 
+<!-- PROBÁ VALENTINA AHORA -->
+<div style="background:var(--surface); border-top:1px solid rgba(37,211,102,0.15); border-bottom:1px solid rgba(37,211,102,0.15); padding:80px 32px; position:relative; overflow:hidden;">
+    <div style="position:absolute; top:0; left:0; right:0; bottom:0; background:radial-gradient(ellipse 60% 50% at 50% 50%, rgba(37,211,102,0.04) 0%, transparent 70%); pointer-events:none;"></div>
+    <div style="max-width:860px; margin:0 auto; position:relative; z-index:1;">
+
+        <div class="reveal" style="text-align:center; margin-bottom:52px;">
+            <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(37,211,102,0.08); border:1px solid rgba(37,211,102,0.22); color:#25D366; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:6px 18px; border-radius:100px; margin-bottom:24px;">
+                <span style="width:6px;height:6px;background:#25D366;border-radius:50%;animation:blink 2s infinite;display:inline-block;"></span>
+                Demo disponible ahora mismo
+            </div>
+            <h2 style="font-size:clamp(26px,4vw,44px); font-weight:900; line-height:1.1; letter-spacing:-0.02em; margin-bottom:14px; text-wrap:balance;">Probá a Valentina en tu<br>WhatsApp en 30 segundos</h2>
+            <p style="font-size:16px; color:var(--muted2); max-width:520px; margin:0 auto; line-height:1.7;">Sin instalar nada. Sin crear cuenta. Tres pasos y estás hablando con el agente real que va a atender a los pacientes de Centro de Ojos La Rioja.</p>
+        </div>
+
+        <!-- PASOS -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px; margin-bottom:48px;">
+
+            <div class="reveal" style="background:rgba(37,211,102,0.04); border:1px solid rgba(37,211,102,0.14); border-radius:18px; padding:28px; position:relative; transition:transform 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s;" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='rgba(37,211,102,0.32)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(37,211,102,0.14)'">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#25D366);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#000;margin-bottom:16px;">1</div>
+                <div style="font-size:26px; margin-bottom:12px;">📱</div>
+                <div style="font-size:15px; font-weight:700; margin-bottom:8px;">Abrí WhatsApp</div>
+                <div style="font-size:13px; color:var(--muted2); line-height:1.65;">Hacé clic en el botón verde de abajo. Se va a abrir WhatsApp con el número del sandbox de Twilio ya cargado.</div>
+            </div>
+
+            <div class="reveal" style="background:rgba(37,211,102,0.04); border:1px solid rgba(37,211,102,0.14); border-radius:18px; padding:28px; position:relative; transition:transform 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s; transition-delay:0.07s;" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='rgba(37,211,102,0.32)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(37,211,102,0.14)'">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#25D366);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#000;margin-bottom:16px;">2</div>
+                <div style="font-size:26px; margin-bottom:12px;">✉️</div>
+                <div style="font-size:15px; font-weight:700; margin-bottom:8px;">Enviá el mensaje de activación</div>
+                <div style="font-size:13px; color:var(--muted2); line-height:1.65;">El mensaje ya viene escrito. Solo presioná <strong style="color:var(--text);">Enviar</strong>. Twilio va a confirmar que quedaste conectado al sandbox.</div>
+                <div style="margin-top:14px; background:var(--surface2); border-radius:10px; padding:10px 14px; font-family:monospace; font-size:13px; color:#25D366; letter-spacing:0.5px;">join paragraph-making</div>
+            </div>
+
+            <div class="reveal" style="background:rgba(37,211,102,0.04); border:1px solid rgba(37,211,102,0.14); border-radius:18px; padding:28px; position:relative; transition:transform 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s; transition-delay:0.14s;" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='rgba(37,211,102,0.32)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(37,211,102,0.14)'">
+                <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#25D366);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#000;margin-bottom:16px;">3</div>
+                <div style="font-size:26px; margin-bottom:12px;">👁</div>
+                <div style="font-size:15px; font-weight:700; margin-bottom:8px;">Hablale a Valentina</div>
+                <div style="font-size:13px; color:var(--muted2); line-height:1.65;">Una vez confirmado, escribile lo que quieras — consulta por glaucoma, catarata, turno, emergencia. El agente es real y funciona exactamente igual que en producción.</div>
+            </div>
+
+        </div>
+
+        <!-- BOTÓN PRINCIPAL -->
+        <div class="reveal" style="text-align:center; margin-bottom:28px;">
+            <a href="https://wa.me/14155238886?text=join%20paragraph-making" target="_blank"
+               style="display:inline-flex; align-items:center; gap:12px; background:#25D366; color:#000; font-weight:800; font-size:16px; padding:18px 40px; border-radius:14px; text-decoration:none; position:relative; overflow:hidden; transition:transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;"
+               onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 20px 56px rgba(37,211,102,0.45)'"
+               onmouseout="this.style.transform='';this.style.boxShadow=''">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.859L.057 23.25a.75.75 0 00.918.943l5.444-1.432A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.713 9.713 0 01-4.95-1.354l-.355-.21-3.676.966.983-3.588-.23-.369A9.711 9.711 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+                Activar sandbox y hablar con Valentina
+            </a>
+        </div>
+
+        <!-- NOTA SANDBOX -->
+        <div class="reveal" style="display:flex; align-items:flex-start; gap:14px; background:rgba(13,157,166,0.05); border:1px solid rgba(13,157,166,0.14); border-radius:14px; padding:18px 22px; max-width:640px; margin:0 auto;">
+            <span style="font-size:18px; flex-shrink:0;">ℹ️</span>
+            <div style="font-size:13px; color:var(--muted2); line-height:1.7;">
+                <strong style="color:var(--text);">Modo sandbox de Twilio</strong> — Permite hasta 5 personas conectadas simultáneamente. Ideal para que el equipo de Centro de Ojos La Rioja pruebe el agente antes de migrar al número propio. La conexión dura 72 horas; si se vence, simplemente reenviá el mensaje de activación.
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <!-- CTA -->
 <div class="cta-wrap reveal">
     <h2>¿Querés ver Valentina<br>en acción?</h2>
@@ -735,11 +951,40 @@ footer { background:#050810; border-top:1px solid var(--border); padding:28px 48
 </footer>
 
 <script>
-const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+// Scroll progress bar + header state
+const progressBar = document.getElementById('scroll-progress');
+const header = document.querySelector('header');
+window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+    progressBar.style.width = Math.min(pct, 100) + '%';
+    header.classList.toggle('scrolled', window.scrollY > 48);
+}, { passive: true });
 
+// Staggered reveal for grid children, immediate for solo elements
+const GRID_SELECTORS = '.cap-grid, .knowledge-grid, .stack-grid, .upsell-grid, .flow-steps, .payment-flow, .scenarios-grid';
+
+const gridObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        e.target.querySelectorAll('.reveal').forEach((child, i) => {
+            setTimeout(() => child.classList.add('visible'), i * 60);
+        });
+        gridObserver.unobserve(e.target);
+    });
+}, { threshold: 0.08 });
+
+const soloObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+
+const gridChildren = new Set();
+document.querySelectorAll(GRID_SELECTORS).forEach(grid => {
+    grid.querySelectorAll('.reveal').forEach(child => gridChildren.add(child));
+    gridObserver.observe(grid);
+});
+document.querySelectorAll('.reveal').forEach(el => {
+    if (!gridChildren.has(el)) soloObserver.observe(el);
+});
 </script>
 </body>
 </html>
