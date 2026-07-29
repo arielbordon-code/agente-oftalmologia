@@ -98,8 +98,15 @@ def _aplicar_color_fila(sheet, fila_num: int):
 def registrar_lead(telefono: str, nombre: str, tratamiento: str,
                    sucursal: str = "", horario: str = ""):
     """Registra un lead calificado en el Sheet."""
+    print(f"[Sheets] Intentando registrar: {nombre} | {tratamiento} | {horario}")
     try:
         sheet = get_sheet()
+        print(f"[Sheets] Conexión OK — Sheet ID: {SHEET_ID}")
+    except Exception as e:
+        print(f"[Sheets] Error de conexión: {type(e).__name__}: {e}")
+        return False
+
+    try:
         fila = [
             datetime.now().strftime("%d/%m/%Y %H:%M"),
             telefono,
@@ -110,14 +117,15 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
             "Pendiente confirmar",
         ]
         sheet.append_row(fila)
+        print(f"[Sheets] Fila escrita correctamente")
     except Exception as e:
-        print(f"[Sheets] Error al registrar lead: {e}")
+        print(f"[Sheets] Error al escribir fila: {type(e).__name__}: {e}")
         return False
 
     try:
         fila_num = len(sheet.col_values(1))
         _aplicar_color_fila(sheet, fila_num)
     except Exception as e:
-        print(f"[Sheets] Error al aplicar formato (dato guardado): {e}")
+        print(f"[Sheets] Error al aplicar formato (dato guardado igualmente): {e}")
 
     return True

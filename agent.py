@@ -159,6 +159,7 @@ class Conversation:
     messages: list = field(default_factory=list)
     stage: str = "inicio"
     turno_registrado: bool = False
+    pending_lead: Optional[dict] = None
 
 
 class OftalmologiaAgent:
@@ -183,7 +184,23 @@ class OftalmologiaAgent:
         if phone_number in self.conversations:
             del self.conversations[phone_number]
 
+    def _retry_pending_lead(self, phone_number: str) -> None:
+        """Reintenta registrar un lead que falló en el intento anterior."""
+        conv = self.conversations.get(phone_number)
+        if not conv or not conv.pending_lead or conv.turno_registrado:
+            return
+        data = conv.pending_lead
+        print(f"[Sheets] Reintentando lead pendiente para {phone_number}...")
+        ok = registrar_lead(**data)
+        if ok:
+            print(f"[Sheets] Lead pendiente registrado: {data['nombre']}")
+            conv.turno_registrado = True
+            conv.pending_lead = None
+        else:
+            print(f"[Sheets] ⚠️ Reintento fallido para {phone_number}, se intentará de nuevo")
+
     def reply(self, phone_number: str, user_message: str) -> str:
+        self._retry_pending_lead(phone_number)
         conv = self.get_or_create_conversation(phone_number)
 
         conv.messages.append(
@@ -239,19 +256,23 @@ class OftalmologiaAgent:
         if not nombre.strip():
             print(f"[Sheets] Señal ##TURNO## sin nombre — ignorada (señal prematura del modelo)")
             return mensaje
-        ok = registrar_lead(
-            telefono=phone_number,
-            nombre=nombre.strip(),
-            tratamiento=tratamiento.strip(),
-            sucursal=sucursal.strip(),
-            horario=horario.strip(),
-        )
+        lead_data = {
+            "telefono": phone_number,
+            "nombre": nombre.strip(),
+            "tratamiento": tratamiento.strip(),
+            "sucursal": sucursal.strip(),
+            "horario": horario.strip(),
+        }
+        ok = registrar_lead(**lead_data)
         if ok:
             print(f"[Sheets] Lead registrado: {nombre} — {tratamiento}")
             if conv:
                 conv.turno_registrado = True
+                conv.pending_lead = None
         else:
-            print(f"[Sheets] ⚠️ Fallo al registrar lead para {phone_number}. Se reintentará en próximo mensaje.")
+            print(f"[Sheets] ⚠️ Fallo al registrar lead para {phone_number}. Guardado para reintento.")
+            if conv:
+                conv.pending_lead = lead_data
         return mensaje
 
     def get_conversation_summary(self, phone_number: str) -> dict:
