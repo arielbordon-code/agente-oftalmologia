@@ -61,7 +61,11 @@ def webhook():
     # Comandos especiales para gestión
     if incoming_msg.lower() in ["reiniciar", "restart", "nueva consulta"]:
         agent.reset_conversation(sender_number)
-        reply_text = "¡Hola nuevamente! 👋 Soy Valentina, agente de tu negocio. ¿En qué te puedo ayudar hoy?"
+        reply_text = (
+            "¡Hola de nuevo! 👋 Arranquemos la demo otra vez. Contame 3 cosas rápidas: "
+            "¿cómo se llama tu negocio, a qué se dedica, y qué te gustaría resolver por "
+            "WhatsApp (turnos, consultas, pedidos)?"
+        )
     else:
         reply_text = agent.reply(sender_number, incoming_msg)
 
@@ -76,7 +80,7 @@ def webhook():
 @app.route("/health", methods=["GET"])
 def health():
     """Endpoint de salud para monitoreo."""
-    return {"status": "ok", "agente": "Negocio Ejemplo"}
+    return {"status": "ok", "agente": "Valentina - Demo Kyrios"}
 
 
 @app.route("/conversaciones", methods=["GET"])
@@ -90,6 +94,6 @@ def conversaciones():
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
-    print(f"👋 Agente Negocio Ejemplo (demo) iniciado en puerto {port}")
+    print(f"👋 Agente Valentina (demo comercial Kyrios) iniciado en puerto {port}")
     print(f"   Webhook URL: http://localhost:{port}/webhook")
     app.run(debug=True, port=port)

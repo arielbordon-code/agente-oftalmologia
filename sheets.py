@@ -9,7 +9,7 @@ from datetime import datetime
 import os
 import json
 
-SHEET_ID = os.getenv("SHEET_ID", "1H8Zzqvhju80ePBawZGy8W1-zvXeR5HfyMSI3DCQqCA8")
+SHEET_ID = os.getenv("SHEET_ID", "1hyPscn6LOKnJQYGmYruhGB7983ONRej7DUm9YSuP0n4")
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "google-credentials.json")
 
 SCOPES = [
@@ -21,9 +21,9 @@ HEADERS = [
     "Fecha",
     "Teléfono",
     "Nombre",
-    "Motivo de consulta",
-    "Sede",
-    "Horario preferido",
+    "Qué quiere resolver por WhatsApp",
+    "Negocio / Rubro",
+    "Horario preferido (llamada)",
     "Score IA",
     "Estado",
 ]
@@ -50,23 +50,9 @@ def get_sheet():
 
 
 def calcular_score(tratamiento: str) -> str:
-    """Asigna score IA según el tipo de tratamiento detectado."""
-    t = tratamiento.lower()
-    keywords_alto = [
-        "cirugía", "cirugia", "catarata", "retina", "glaucoma", "queratocono",
-        "láser", "laser", "crosslinking", "vitrectomía", "vitrectomia",
-        "desprendimiento", "trasplante", "refractiva", "miopía", "miopia",
-        "hipermetropía", "hipermetropia", "astigmatismo", "presbicia",
-        "lente intraocular", "pterigion", "dacriocistitis", "urgencia", "emergencia",
-    ]
-    keywords_bajo = [
-        "información", "informacion", "precio", "costo", "duda", "pregunta", "consulta general",
-    ]
-    if any(k in t for k in keywords_alto):
-        return "Alto"
-    elif any(k in t for k in keywords_bajo):
-        return "Bajo"
-    return "Medio"
+    """Todo lead que llega hasta acá completó la demo entera (consulta + calificación
+    + dejó nombre y horario), así que ya es un prospecto caliente."""
+    return "Alto"
 
 
 def setup_formato():
@@ -77,7 +63,7 @@ def setup_formato():
 
     sheet.update_title("Leads WhatsApp")
 
-    sheet.update("A1:H1", [["Negocio Ejemplo — Clientes WhatsApp"] + [""] * 7])
+    sheet.update("A1:H1", [["Kyrios — Prospectos Demo Valentina"] + [""] * 7])
     sheet.merge_cells("A1:H1")
     format_cell_range(sheet, "A1:H1", CellFormat(
         backgroundColor=COLOR_TITULO,
