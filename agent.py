@@ -143,7 +143,6 @@ class OftalmologiaAgent:
                 response = self.client.messages.create(
                     model=self.MODEL,
                     max_tokens=450,
-                    temperature=0.7,
                     system=SYSTEM_PROMPT,
                     messages=conv.messages,
                 )
