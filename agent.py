@@ -4,8 +4,7 @@ Detecta la consulta del cliente, hace 3 preguntas de calificación
 y ofrece turno si corresponde. Detecta solicitudes urgentes.
 """
 
-from google import genai
-from google.genai import types
+from anthropic import Anthropic
 from dataclasses import dataclass, field
 from typing import Optional
 from sheets import registrar_lead
@@ -97,14 +96,14 @@ class Conversation:
 class OftalmologiaAgent:
     """Agente conversacional de demostración (Negocio Ejemplo)."""
 
-    MODEL = "gemini-2.5-flash"
+    MODEL = "claude-haiku-4-5-20251001"
 
     def __init__(self, api_key: Optional[str] = None):
         import os
-        key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+        key = api_key or os.getenv("ANTHROPIC_API_KEY")
         if not key:
-            raise ValueError("GEMINI_API_KEY no está configurada")
-        self.client = genai.Client(api_key=key)
+            raise ValueError("ANTHROPIC_API_KEY no está configurada")
+        self.client = Anthropic(api_key=key)
         self.conversations: dict[str, Conversation] = {}
 
     def get_or_create_conversation(self, phone_number: str) -> Conversation:
@@ -135,40 +134,34 @@ class OftalmologiaAgent:
         self._retry_pending_lead(phone_number)
         conv = self.get_or_create_conversation(phone_number)
 
-        conv.messages.append(
-            types.Content(role="user", parts=[types.Part(text=user_message)])
-        )
+        conv.messages.append({"role": "user", "content": user_message})
 
         import time
         ultimo_error = None
         for intento in range(3):
             try:
-                response = self.client.models.generate_content(
+                response = self.client.messages.create(
                     model=self.MODEL,
-                    config=types.GenerateContentConfig(
-                        system_instruction=SYSTEM_PROMPT,
-                        max_output_tokens=450,
-                        temperature=0.7,
-                    ),
-                    contents=conv.messages,
+                    max_tokens=450,
+                    temperature=0.7,
+                    system=SYSTEM_PROMPT,
+                    messages=conv.messages,
                 )
                 break
             except Exception as e:
                 ultimo_error = e
                 if intento < 2:
-                    print(f"[Gemini] Error transitorio (intento {intento + 1}/3): {e}. Reintentando...")
+                    print(f"[Claude] Error transitorio (intento {intento + 1}/3): {e}. Reintentando...")
                     time.sleep(2)
                 else:
-                    print(f"[Gemini] Error después de 3 intentos: {e}")
+                    print(f"[Claude] Error después de 3 intentos: {e}")
                     conv.messages.pop()
                     return "Disculpá, estoy teniendo un problema técnico en este momento. ¿Podés volver a escribirme en un instante? 🙏"
 
-        assistant_message = response.text or ""
+        assistant_message = next((b.text for b in response.content if b.type == "text"), "")
         assistant_message = self._procesar_turno(phone_number, assistant_message)
 
-        conv.messages.append(
-            types.Content(role="model", parts=[types.Part(text=assistant_message)])
-        )
+        conv.messages.append({"role": "assistant", "content": assistant_message})
 
         return assistant_message
 
@@ -215,7 +208,7 @@ class OftalmologiaAgent:
             "phone_number": phone_number,
             "total_mensajes": len(conv.messages),
             "ultimo_mensaje_usuario": next(
-                (m.parts[0].text for m in reversed(conv.messages) if m.role == "user"),
+                (m["content"] for m in reversed(conv.messages) if m["role"] == "user"),
                 None
             ),
         }

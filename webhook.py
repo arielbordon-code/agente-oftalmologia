@@ -22,7 +22,7 @@ load_dotenv()
 
 
 app = Flask(__name__)
-agent = EsteticaAgent(api_key=os.getenv("GEMINI_API_KEY"))
+agent = EsteticaAgent(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 
