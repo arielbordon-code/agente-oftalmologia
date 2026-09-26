@@ -77,7 +77,7 @@ def setup_formato():
 
     sheet.update_title("Leads WhatsApp")
 
-    sheet.update("A1:H1", [["Centro de Ojos La Rioja — Pacientes WhatsApp"] + [""] * 7])
+    sheet.update("A1:H1", [["Negocio Ejemplo — Clientes WhatsApp"] + [""] * 7])
     sheet.merge_cells("A1:H1")
     format_cell_range(sheet, "A1:H1", CellFormat(
         backgroundColor=COLOR_TITULO,
