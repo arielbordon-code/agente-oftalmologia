@@ -69,7 +69,7 @@ class Conversation:
     phone_number: str
     messages: list = field(default_factory=list)
     stage: str = "inicio"
-    turno_registrado: bool = False
+    ultimo_lead_registrado: Optional[dict] = None
     pending_lead: Optional[dict] = None
 
 
@@ -98,14 +98,14 @@ class OftalmologiaAgent:
     def _retry_pending_lead(self, phone_number: str) -> None:
         """Reintenta registrar un lead que falló en el intento anterior."""
         conv = self.conversations.get(phone_number)
-        if not conv or not conv.pending_lead or conv.turno_registrado:
+        if not conv or not conv.pending_lead:
             return
         data = conv.pending_lead
         print(f"[Sheets] Reintentando lead pendiente para {phone_number}...")
         ok = registrar_lead(**data)
         if ok:
             print(f"[Sheets] Lead pendiente registrado: {data['nombre']}")
-            conv.turno_registrado = True
+            conv.ultimo_lead_registrado = data
             conv.pending_lead = None
         else:
             print(f"[Sheets] ⚠️ Reintento fallido para {phone_number}, se intentará de nuevo")
@@ -153,9 +153,6 @@ class OftalmologiaAgent:
         if not match:
             return mensaje
         conv = self.conversations.get(phone_number)
-        if conv and conv.turno_registrado:
-            print(f"[Sheets] Turno duplicado ignorado para {phone_number}")
-            return mensaje
         nombre, tratamiento, sucursal, horario = match.groups()
         if not nombre.strip():
             print(f"[Sheets] Señal ##TURNO## sin nombre — ignorada (señal prematura del modelo)")
@@ -167,11 +164,14 @@ class OftalmologiaAgent:
             "sucursal": sucursal.strip(),
             "horario": horario.strip(),
         }
+        if conv and conv.ultimo_lead_registrado == lead_data:
+            print(f"[Sheets] Turno duplicado ignorado para {phone_number}")
+            return mensaje
         ok = registrar_lead(**lead_data)
         if ok:
             print(f"[Sheets] Lead registrado: {nombre} — {tratamiento}")
             if conv:
-                conv.turno_registrado = True
+                conv.ultimo_lead_registrado = lead_data
                 conv.pending_lead = None
         else:
             print(f"[Sheets] ⚠️ Fallo al registrar lead para {phone_number}. Guardado para reintento.")
