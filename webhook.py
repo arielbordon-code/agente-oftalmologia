@@ -18,7 +18,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from twilio.request_validator import RequestValidator
 from dotenv import load_dotenv
 from agent import OftalmologiaAgent as EsteticaAgent
-from sheets import listar_leads
+from sheets import listar_leads, actualizar_estado, actualizar_notas, ESTADO_A_TEXTO
 
 load_dotenv()
 
@@ -110,6 +110,32 @@ def api_conversaciones():
         return jsonify({"error": "unauthorized"}), 401
     conversaciones = agent.to_dashboard_list()
     return jsonify({"conversaciones": conversaciones, "total": len(conversaciones)})
+
+
+@app.route("/api/leads/<int:fila>/estado", methods=["POST"])
+def api_actualizar_estado(fila):
+    """Persiste el estado (pending/confirmed/attended) de un lead en Sheets."""
+    if not _token_valido():
+        return jsonify({"error": "unauthorized"}), 401
+    estado = (request.get_json(silent=True) or {}).get("estado", "")
+    if estado not in ESTADO_A_TEXTO:
+        return jsonify({"error": "estado inválido"}), 400
+    ok = actualizar_estado(fila, estado)
+    if not ok:
+        return jsonify({"error": "no se pudo actualizar"}), 500
+    return jsonify({"ok": True})
+
+
+@app.route("/api/leads/<int:fila>/notas", methods=["POST"])
+def api_actualizar_notas(fila):
+    """Persiste la nota interna de un lead en Sheets."""
+    if not _token_valido():
+        return jsonify({"error": "unauthorized"}), 401
+    notas = (request.get_json(silent=True) or {}).get("notas", "")
+    ok = actualizar_notas(fila, notas)
+    if not ok:
+        return jsonify({"error": "no se pudo actualizar"}), 500
+    return jsonify({"ok": True})
 
 
 if __name__ == "__main__":

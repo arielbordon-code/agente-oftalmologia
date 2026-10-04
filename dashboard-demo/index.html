@@ -849,7 +849,7 @@
                 style="background:#1e293b; color:#e2e8f0; border:1px solid rgba(100,116,139,0.2);"
                 onfocus="this.style.borderColor='rgba(13,157,166,0.4)'"
                 onblur="this.style.borderColor='rgba(100,116,139,0.2)'"></textarea>
-            <button class="mt-2 w-full bg-emerald-700 hover:bg-emerald-600 text-white text-sm py-2 rounded-xl font-medium transition-colors">
+            <button onclick="guardarNota()" class="mt-2 w-full bg-emerald-700 hover:bg-emerald-600 text-white text-sm py-2 rounded-xl font-medium transition-colors">
                 Guardar nota
             </button>
         </div>
@@ -1129,8 +1129,15 @@
 
         function cambiarEstado(nuevoEstado) {
             if (currentDrawerIndex === null) return;
-            leadsData[currentDrawerIndex].estado = nuevoEstado;
+            const lead = leadsData[currentDrawerIndex];
+            lead.estado = nuevoEstado;
             updateEstadoButtons(nuevoEstado);
+
+            fetch(`${API_BASE}/api/leads/${lead.fila}/estado?token=${API_TOKEN}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ estado: nuevoEstado }),
+            }).catch(e => console.error("[Dashboard] Error guardando estado:", e));
 
             // Actualizar badge en el header del drawer
             const eb = document.getElementById('d-estado-badge');
@@ -1146,6 +1153,25 @@
             toastEl.querySelector('p').textContent = `Estado actualizado: ${estadoLabel(nuevoEstado)}`;
             toastEl.classList.add('toast-enter');
             setTimeout(() => { toastEl.classList.add('hidden'); toastEl.classList.remove('toast-enter'); }, 2500);
+        }
+
+        function guardarNota() {
+            if (currentDrawerIndex === null) return;
+            const lead = leadsData[currentDrawerIndex];
+            const notas = document.getElementById('d-notas').value;
+            lead.notas = notas;
+
+            fetch(`${API_BASE}/api/leads/${lead.fila}/notas?token=${API_TOKEN}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ notas }),
+            }).then(() => {
+                const toastEl = document.getElementById('toast');
+                toastEl.classList.remove('hidden');
+                toastEl.querySelector('p').textContent = 'Nota guardada';
+                toastEl.classList.add('toast-enter');
+                setTimeout(() => { toastEl.classList.add('hidden'); toastEl.classList.remove('toast-enter'); }, 2500);
+            }).catch(e => console.error("[Dashboard] Error guardando nota:", e));
         }
 
         function closeDrawer() {

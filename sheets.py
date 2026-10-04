@@ -28,7 +28,15 @@ HEADERS = [
     "Horario preferido (llamada)",
     "Score IA",
     "Estado",
+    "Notas",
 ]
+
+ESTADO_A_TEXTO = {
+    "pending": "Pendiente confirmar",
+    "confirmed": "Confirmado",
+    "attended": "Atendido",
+}
+TEXTO_A_ESTADO = {texto: clave for clave, texto in ESTADO_A_TEXTO.items()}
 
 # Turquesa Centro de Ojos
 COLOR_VERDE = Color(0.10, 0.60, 0.65)
@@ -72,16 +80,16 @@ def setup_formato():
 
     sheet.update_title("Leads WhatsApp")
 
-    sheet.update("A1:H1", [["Kyrios — Prospectos Demo Valentina"] + [""] * 7])
-    sheet.merge_cells("A1:H1")
-    format_cell_range(sheet, "A1:H1", CellFormat(
+    sheet.update("A1:I1", [["Kyrios — Prospectos Demo Valentina"] + [""] * 8])
+    sheet.merge_cells("A1:I1")
+    format_cell_range(sheet, "A1:I1", CellFormat(
         backgroundColor=COLOR_TITULO,
         textFormat=TextFormat(bold=True, fontSize=14, foregroundColor=COLOR_BLANCO),
         horizontalAlignment="CENTER",
     ))
 
-    sheet.update("A2:H2", [HEADERS])
-    format_cell_range(sheet, "A2:H2", CellFormat(
+    sheet.update("A2:I2", [HEADERS])
+    format_cell_range(sheet, "A2:I2", CellFormat(
         backgroundColor=COLOR_VERDE,
         textFormat=TextFormat(bold=True, fontSize=11, foregroundColor=COLOR_BLANCO),
         horizontalAlignment="CENTER",
@@ -97,7 +105,7 @@ def setup_formato():
                 "properties": {"pixelSize": ancho},
                 "fields": "pixelSize"
             }}
-            for i, ancho in enumerate([150, 180, 180, 220, 200, 160, 100, 160])
+            for i, ancho in enumerate([150, 180, 180, 220, 200, 160, 100, 160, 220])
         ]
     }
     spreadsheet.batch_update(body)
@@ -107,7 +115,7 @@ def setup_formato():
 
 def _aplicar_color_fila(sheet, fila_num: int):
     color = COLOR_FILA_PAR if fila_num % 2 == 0 else COLOR_BLANCO
-    rango = f"A{fila_num}:H{fila_num}"
+    rango = f"A{fila_num}:I{fila_num}"
     format_cell_range(sheet, rango, CellFormat(backgroundColor=color))
 
 
@@ -124,7 +132,8 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
         sucursal,
         horario,
         score,
-        "Pendiente confirmar",
+        ESTADO_A_TEXTO["pending"],
+        "",
     ]
 
     sheet = None
@@ -152,32 +161,60 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
 def listar_leads(limite: int = 200) -> list:
     """Lee los leads reales del Sheet para el dashboard.
 
-    La fila 1 es el título fusionado (A1:H1) y la fila 2 son los headers
+    La fila 1 es el título fusionado (A1:I1) y la fila 2 son los headers
     reales (ver setup_formato) — get_all_records() asume headers en la
     fila 1, así que acá se lee todo con get_all_values() y se descartan
-    las primeras 2 filas a mano.
+    las primeras 2 filas a mano. Los datos arrancan en la fila 3 del
+    Sheet real, por eso "fila" = índice en la lista + 3.
     """
     sheet = get_sheet()
     filas = sheet.get_all_values()[2:]
 
     leads = []
-    for fila in filas:
-        if len(fila) < len(HEADERS) or not fila[1].strip():
+    for i, fila in enumerate(filas):
+        if len(fila) < 8 or not fila[1].strip():
             continue
-        fecha, telefono, nombre, necesidad, rubro, horario, score_ia, estado = fila[:8]
+        fecha, telefono, nombre, necesidad, rubro, horario, score_ia, estado_texto = fila[:8]
+        notas = fila[8] if len(fila) > 8 else ""
         leads.append({
+            "fila": i + 3,
             "telefono": telefono,
             "nombre": nombre,
             "necesidad": necesidad,
             "rubro": rubro,
             "horario": horario,
-            "estado": "pending",
+            "estado": TEXTO_A_ESTADO.get(estado_texto, "pending"),
             "score": SCORE_PRESETS.get(score_ia, SCORE_PRESETS["Bajo"]),
             "fecha": fecha,
             "initials": obtener_iniciales(nombre),
             "color": asignar_color(telefono or nombre),
-            "notas": "",
+            "notas": notas,
         })
 
     leads.reverse()
     return leads[:limite]
+
+
+def actualizar_estado(fila: int, estado: str) -> bool:
+    """Actualiza la columna Estado (H) de una fila puntual del Sheet."""
+    texto = ESTADO_A_TEXTO.get(estado)
+    if not texto:
+        return False
+    for intento in range(3):
+        try:
+            get_sheet().update_cell(fila, 8, texto)
+            return True
+        except Exception as e:
+            print(f"[Sheets] Error actualizando estado (intento {intento + 1}/3): {type(e).__name__}: {e}")
+    return False
+
+
+def actualizar_notas(fila: int, notas: str) -> bool:
+    """Actualiza la columna Notas (I) de una fila puntual del Sheet."""
+    for intento in range(3):
+        try:
+            get_sheet().update_cell(fila, 9, notas)
+            return True
+        except Exception as e:
+            print(f"[Sheets] Error actualizando notas (intento {intento + 1}/3): {type(e).__name__}: {e}")
+    return False
