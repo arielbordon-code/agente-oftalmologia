@@ -6,10 +6,12 @@ calificación, y cierra pidiendo los datos reales del prospecto
 para coordinar una llamada comercial.
 """
 
+import time
 from anthropic import Anthropic
 from dataclasses import dataclass, field
 from typing import Optional
 from sheets import registrar_lead
+from dashboard_utils import obtener_iniciales, asignar_color
 
 SYSTEM_PROMPT = """Sos Valentina, la demo en vivo de un agente de IA para WhatsApp. Quien te escribe es un prospecto probando la demo para decidir si contratar el servicio — NO es un cliente real de ningún negocio. Tu objetivo es que, después de ver cómo trabajás, quiera contratar un agente como vos para su propio negocio.
 
@@ -71,6 +73,7 @@ class Conversation:
     stage: str = "inicio"
     ultimo_lead_registrado: Optional[dict] = None
     pending_lead: Optional[dict] = None
+    last_activity: float = field(default_factory=time.time)
 
 
 class OftalmologiaAgent:
@@ -95,6 +98,15 @@ class OftalmologiaAgent:
         if phone_number in self.conversations:
             del self.conversations[phone_number]
 
+    def _podar_conversaciones_viejas(self, max_horas: int = 48) -> None:
+        """Descarta del dict en memoria las conversaciones inactivas hace
+        más de max_horas, para que el dashboard no muestre pruebas viejas
+        como 'actividad de hoy'."""
+        limite = time.time() - max_horas * 3600
+        viejas = [tel for tel, conv in self.conversations.items() if conv.last_activity < limite]
+        for tel in viejas:
+            del self.conversations[tel]
+
     def _retry_pending_lead(self, phone_number: str) -> None:
         """Reintenta registrar un lead que falló en el intento anterior."""
         conv = self.conversations.get(phone_number)
@@ -111,12 +123,13 @@ class OftalmologiaAgent:
             print(f"[Sheets] ⚠️ Reintento fallido para {phone_number}, se intentará de nuevo")
 
     def reply(self, phone_number: str, user_message: str) -> str:
+        self._podar_conversaciones_viejas()
         self._retry_pending_lead(phone_number)
         conv = self.get_or_create_conversation(phone_number)
+        conv.last_activity = time.time()
 
         conv.messages.append({"role": "user", "content": user_message})
 
-        import time
         ultimo_error = None
         for intento in range(3):
             try:
@@ -178,6 +191,36 @@ class OftalmologiaAgent:
             if conv:
                 conv.pending_lead = lead_data
         return mensaje
+
+    def to_dashboard_list(self) -> list:
+        """Arma la lista de conversaciones en vivo para el dashboard."""
+        resultado = []
+        for conv in self.conversations.values():
+            if conv.ultimo_lead_registrado:
+                nombre = conv.ultimo_lead_registrado["nombre"]
+                status = "Datos registrados ✅"
+            elif conv.pending_lead:
+                nombre = conv.pending_lead["nombre"]
+                status = "Reintentando registro…"
+            else:
+                nombre = f"Prospecto {conv.phone_number[-4:]}"
+                status = f"En curso · {len(conv.messages)} mensajes"
+
+            resultado.append({
+                "telefono": conv.phone_number,
+                "initials": obtener_iniciales(nombre),
+                "color": asignar_color(conv.phone_number),
+                "nombre": nombre,
+                "status": status,
+                "messages": [
+                    {"from": "bot" if m["role"] == "assistant" else "user", "text": m["content"]}
+                    for m in conv.messages
+                ],
+                "last_activity": conv.last_activity,
+            })
+
+        resultado.sort(key=lambda c: c["last_activity"], reverse=True)
+        return resultado
 
     def get_conversation_summary(self, phone_number: str) -> dict:
         conv = self.conversations.get(phone_number)

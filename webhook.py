@@ -12,11 +12,13 @@ Para conectar con Twilio:
 
 import os
 from collections import deque
-from flask import Flask, request, Response
+from flask import Flask, request, Response, jsonify
+from flask_cors import CORS
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.request_validator import RequestValidator
 from dotenv import load_dotenv
 from agent import OftalmologiaAgent as EsteticaAgent
+from sheets import listar_leads
 
 load_dotenv()
 
@@ -25,6 +27,15 @@ app = Flask(__name__)
 agent = EsteticaAgent(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+
+DASHBOARD_API_TOKEN = os.getenv("DASHBOARD_API_TOKEN", "")
+DASHBOARD_ORIGINS = [o.strip() for o in os.getenv("DASHBOARD_ORIGINS", "").split(",") if o.strip()]
+CORS(app, resources={r"/api/*": {"origins": DASHBOARD_ORIGINS}})
+
+
+def _token_valido() -> bool:
+    token = request.args.get("token", "")
+    return bool(DASHBOARD_API_TOKEN) and token == DASHBOARD_API_TOKEN
 
 # Deduplicación: evita procesar el mismo mensaje dos veces si Twilio reintenta
 _processed_sids = deque(maxlen=200)
@@ -83,13 +94,22 @@ def health():
     return {"status": "ok", "agente": "Valentina - Demo Kyrios"}
 
 
-@app.route("/conversaciones", methods=["GET"])
-def conversaciones():
-    """Lista las conversaciones activas (solo para debugging)."""
-    return {
-        "conversaciones_activas": len(agent.conversations),
-        "numeros": list(agent.conversations.keys())
-    }
+@app.route("/api/leads", methods=["GET"])
+def api_leads():
+    """Leads reales registrados en Sheets, para el dashboard."""
+    if not _token_valido():
+        return jsonify({"error": "unauthorized"}), 401
+    leads = listar_leads()
+    return jsonify({"leads": leads, "total": len(leads)})
+
+
+@app.route("/api/conversaciones", methods=["GET"])
+def api_conversaciones():
+    """Conversaciones en vivo (en memoria), para el dashboard."""
+    if not _token_valido():
+        return jsonify({"error": "unauthorized"}), 401
+    conversaciones = agent.to_dashboard_list()
+    return jsonify({"conversaciones": conversaciones, "total": len(conversaciones)})
 
 
 if __name__ == "__main__":

@@ -9,6 +9,8 @@ from datetime import datetime
 import os
 import json
 
+from dashboard_utils import obtener_iniciales, asignar_color
+
 SHEET_ID = os.getenv("SHEET_ID", "1hyPscn6LOKnJQYGmYruhGB7983ONRej7DUm9YSuP0n4")
 CREDENTIALS_FILE = os.path.join(os.path.dirname(__file__), "google-credentials.json")
 
@@ -53,6 +55,13 @@ def calcular_score(tratamiento: str) -> str:
     """Todo lead que llega hasta acá completó la demo entera (consulta + calificación
     + dejó nombre y horario), así que ya es un prospecto caliente."""
     return "Alto"
+
+
+SCORE_PRESETS = {
+    "Alto":  {"nivel": "Alto",  "css": "badge-score-alto",  "pct": 92, "razon": "Prospecto llegó hasta el cierre de la demo con datos reales."},
+    "Medio": {"nivel": "Medio", "css": "badge-score-medio", "pct": 58, "razon": "Avanzó en la demo pero no completó el cierre."},
+    "Bajo":  {"nivel": "Bajo",  "css": "badge-score-bajo",  "pct": 28, "razon": "Interacción breve, sin calificación completa."},
+}
 
 
 def setup_formato():
@@ -138,3 +147,37 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
         print(f"[Sheets] Error al aplicar formato (dato guardado igualmente): {e}")
 
     return True
+
+
+def listar_leads(limite: int = 200) -> list:
+    """Lee los leads reales del Sheet para el dashboard.
+
+    La fila 1 es el título fusionado (A1:H1) y la fila 2 son los headers
+    reales (ver setup_formato) — get_all_records() asume headers en la
+    fila 1, así que acá se lee todo con get_all_values() y se descartan
+    las primeras 2 filas a mano.
+    """
+    sheet = get_sheet()
+    filas = sheet.get_all_values()[2:]
+
+    leads = []
+    for fila in filas:
+        if len(fila) < len(HEADERS) or not fila[1].strip():
+            continue
+        fecha, telefono, nombre, necesidad, rubro, horario, score_ia, estado = fila[:8]
+        leads.append({
+            "telefono": telefono,
+            "nombre": nombre,
+            "necesidad": necesidad,
+            "rubro": rubro,
+            "horario": horario,
+            "estado": "pending",
+            "score": SCORE_PRESETS.get(score_ia, SCORE_PRESETS["Bajo"]),
+            "fecha": fecha,
+            "initials": obtener_iniciales(nombre),
+            "color": asignar_color(telefono or nombre),
+            "notas": "",
+        })
+
+    leads.reverse()
+    return leads[:limite]
