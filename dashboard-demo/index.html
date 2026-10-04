@@ -7,12 +7,49 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', sans-serif; }
+        :root {
+            --navy-950: #080E18;
+            --navy-900: #0B1626;
+            --navy-800: #111E2E;
+            --navy-700: #16263A;
+            --navy-600: #1C3046;
+            --ink-50:  #E7ECF1;
+            --ink-200: #AEBBCB;
+            --ink-400: #728197;
+            --ink-600: #8291A3;
+            --brand-blue:       #0483CB;
+            --brand-blue-dark:  #0369A3;
+            --brand-blue-light: #4FB8EC;
+            --brand-teal:       #22C7D9;
+            --brand-teal-dark:  #009FB3;
+            --brand-green:      #32D583;
+            --brand-amber:      #FBBF24;
+            --brand-amber-dark: #F59E0B;
+            --brand-violet:     #A78BFA;
+            --brand-red:        #F87171;
+        }
 
-        .gradient-sidebar { background: linear-gradient(180deg, #062a30 0%, #0a4a52 100%); }
-        .gradient-header  { background: linear-gradient(135deg, #0a4a52 0%, #0d9da6 100%); }
+        * { font-family: 'DM Sans', sans-serif; }
+        h1, h2, h3, .font-brand,
+        .text-3xl.font-extrabold, .text-2xl.font-extrabold, .text-xl.font-extrabold {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.02em;
+        }
+        h1, h2, h3 { text-wrap: balance; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pulse, .tab-content, .toast-enter, .toast-exit,
+            .metric-card, .nav-item, #drawer-panel, #drawer-overlay {
+                animation: none !important;
+                transition: opacity 0.15s linear !important;
+            }
+        }
+
+        .gradient-sidebar { background: linear-gradient(180deg, var(--navy-900) 0%, var(--navy-700) 100%); }
+        .gradient-header  { background: linear-gradient(135deg, var(--brand-blue-dark) 0%, var(--brand-blue) 100%); }
 
         .metric-card {
             transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -22,12 +59,13 @@
             box-shadow: 0 12px 32px rgba(0,0,0,0.10);
         }
 
-        .nav-item { transition: all 0.2s ease; }
+        .nav-item { transition: all 0.2s ease; border-right: 3px solid transparent; }
         .nav-item.active {
-            background: rgba(45, 125, 103, 0.18);
-            color: #4ade80;
-            border-right: 3px solid #4ade80;
+            background: var(--brand-blue);
+            color: #ffffff;
+            border-right-color: var(--brand-blue-light);
         }
+        .nav-item:not(.active) { color: var(--ink-200); }
         .nav-item:not(.active):hover { background: rgba(255,255,255,0.06); }
 
         @keyframes slideInRight {
@@ -54,121 +92,121 @@
         .tab-content { animation: fadeUp 0.35s ease forwards; }
 
         .bubble-valentina {
-            background: #e8f5e9;
+            background: #E8F6F8;
             border-radius: 4px 14px 14px 14px;
         }
         .bubble-user {
-            background: #dcf8c6;
+            background: #E1F0FC;
             border-radius: 14px 4px 14px 14px;
         }
 
-        .badge-pending   { background: #fef3c7; color: #92400e; }
-        .badge-confirmed { background: #d0f4f5; color: #065a60; }
+        .badge-pending   { background: #FEF3C7; color: #92400E; }
+        .badge-confirmed { background: #DCFCE9; color: #0F7A46; }
         .badge-cancelled { background: #fee2e2; color: #991b1b; }
 
         /* Scrollbar */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--navy-600); border-radius: 10px; }
 
         .glass-card {
-            background: #1e293b;
+            background: var(--navy-800);
             backdrop-filter: blur(10px);
         }
 
-        /* ===== DARK THEME ===== */
-        body { background: #0b1120 !important; color: #e2e8f0; }
+        /* ===== DARK THEME (navy de marca Kyrios) ===== */
+        body { background: var(--navy-950) !important; color: var(--ink-50); }
 
-        header { background: #1e293b !important; border-color: rgba(100,116,139,0.15) !important; }
-        header h1 { color: #f1f5f9 !important; }
-        header p  { color: #64748b !important; }
+        header { background: var(--navy-800) !important; border-color: rgba(173,188,203,0.12) !important; }
+        header h1 { color: var(--ink-50) !important; }
+        header p  { color: var(--ink-400) !important; }
 
-        .text-gray-800 { color: #f1f5f9 !important; }
-        .text-gray-700 { color: #e2e8f0 !important; }
-        .text-gray-600 { color: #94a3b8 !important; }
-        .text-gray-500 { color: #64748b !important; }
-        .text-gray-400 { color: #475569 !important; }
+        .text-gray-800 { color: var(--ink-50) !important; }
+        .text-gray-700 { color: var(--ink-50) !important; }
+        .text-gray-600 { color: var(--ink-200) !important; }
+        .text-gray-500 { color: var(--ink-400) !important; }
+        .text-gray-400 { color: var(--ink-600) !important; }
 
-        .bg-white   { background: #1e293b !important; }
-        .bg-gray-50 { background: #131f30 !important; }
-        .bg-gray-100{ background: #1a2b40 !important; }
+        .bg-white   { background: var(--navy-800) !important; }
+        .bg-gray-50 { background: var(--navy-900) !important; }
+        .bg-gray-100{ background: var(--navy-700) !important; }
 
-        .border-gray-100 { border-color: rgba(100,116,139,0.12) !important; }
-        .border-gray-200 { border-color: rgba(100,116,139,0.18) !important; }
-        .divide-gray-50 > * + * { border-color: rgba(100,116,139,0.1) !important; }
+        .border-gray-100 { border-color: rgba(173,188,203,0.12) !important; }
+        .border-gray-200 { border-color: rgba(173,188,203,0.18) !important; }
+        .divide-gray-50 > * + * { border-color: rgba(173,188,203,0.1) !important; }
 
-        .hover\:bg-gray-50:hover { background: rgba(30,45,70,0.8) !important; }
+        .hover\:bg-gray-50:hover { background: rgba(28,48,70,0.8) !important; }
 
         input, select, textarea {
-            background: #131f30 !important;
-            color: #e2e8f0 !important;
-            border-color: rgba(100,116,139,0.2) !important;
+            background: var(--navy-900) !important;
+            color: var(--ink-50) !important;
+            border-color: rgba(173,188,203,0.2) !important;
         }
-        input::placeholder { color: #475569 !important; }
+        input::placeholder { color: var(--ink-600) !important; }
 
         /* Table */
-        thead { background: #131f30 !important; }
-        th.text-gray-400 { color: #475569 !important; }
-        tbody tr:hover { background: rgba(30,45,70,0.6) !important; }
+        thead { background: var(--navy-900) !important; }
+        th.text-gray-400 { color: var(--ink-600) !important; }
+        tbody tr:hover { background: rgba(28,48,70,0.6) !important; }
 
         /* Badges dark */
-        .badge-pending   { background: rgba(251,191,36,0.12)  !important; color: #fbbf24 !important; }
-        .badge-confirmed { background: rgba(13,157,166,0.12)  !important; color: #2dd4cc !important; }
-        .badge-cancelled { background: rgba(239,68,68,0.12)   !important; color: #f87171 !important; }
+        .badge-pending   { background: rgba(251,191,36,0.14)  !important; color: var(--brand-amber) !important; }
+        .badge-confirmed { background: rgba(50,213,131,0.14)  !important; color: var(--brand-green) !important; }
+        .badge-cancelled { background: rgba(239,68,68,0.12)   !important; color: var(--brand-red) !important; }
 
         /* Chat */
-        .bubble-valentina { background: rgba(13,157,166,0.12) !important; color: #e2e8f0 !important; }
-        .bubble-user      { background: rgba(59,130,246,0.15) !important; color: #e2e8f0 !important; }
-        #chat-messages    { background: #0b1120 !important; }
+        .bubble-valentina { background: rgba(34,199,217,0.12) !important; color: var(--ink-50) !important; }
+        .bubble-user      { background: rgba(4,131,203,0.18)  !important; color: var(--ink-50) !important; }
+        #chat-messages    { background: var(--navy-950) !important; }
 
-        /* Emerald tones on dark */
-        .bg-emerald-50  { background: rgba(13,157,166,0.08) !important; }
-        .bg-emerald-100 { background: rgba(13,157,166,0.12) !important; }
-        .border-emerald-100 { border-color: rgba(13,157,166,0.15) !important; }
-        .text-emerald-700 { color: #2dd4cc !important; }
-        .text-emerald-600 { color: #2dd4cc !important; }
+        /* Emerald tones on dark -> acento de marca */
+        .bg-emerald-50  { background: rgba(4,131,203,0.08) !important; }
+        .bg-emerald-100 { background: rgba(4,131,203,0.14) !important; }
+        .border-emerald-100 { border-color: rgba(4,131,203,0.2) !important; }
+        .text-emerald-700 { color: var(--brand-blue-light) !important; }
+        .text-emerald-600 { color: var(--brand-blue-light) !important; }
 
         /* Blue/Purple/Yellow icon backgrounds */
-        .bg-blue-100   { background: rgba(59,130,246,0.12)  !important; }
-        .bg-purple-100 { background: rgba(139,92,246,0.12)  !important; }
-        .bg-yellow-100 { background: rgba(251,191,36,0.12)  !important; }
-        .bg-red-100    { background: rgba(239,68,68,0.12)   !important; }
-        .bg-teal-100   { background: rgba(20,184,166,0.12)  !important; }
-        .bg-pink-100   { background: rgba(236,72,153,0.12)  !important; }
-        .bg-indigo-100 { background: rgba(99,102,241,0.12)  !important; }
+        .bg-blue-100   { background: rgba(79,184,236,0.14) !important; }
+        .bg-purple-100 { background: rgba(167,139,250,0.14) !important; }
+        .bg-yellow-100 { background: rgba(251,191,36,0.14)  !important; }
+        .bg-red-100    { background: rgba(248,113,113,0.14) !important; }
+        .bg-teal-100   { background: rgba(34,199,217,0.14)  !important; }
+        .bg-pink-100   { background: rgba(236,72,153,0.14)  !important; }
+        .bg-indigo-100 { background: rgba(99,102,241,0.14)  !important; }
 
         /* Antes vs Ahora dark */
-        .bg-red-50      { background: rgba(239,68,68,0.07)  !important; }
-        .border-red-100 { border-color: rgba(239,68,68,0.15) !important; }
-        .text-red-400   { color: #f87171 !important; }
+        .bg-red-50      { background: rgba(248,113,113,0.07) !important; }
+        .border-red-100 { border-color: rgba(248,113,113,0.15) !important; }
+        .text-red-400   { color: var(--brand-red) !important; }
         .bg-amber-50    { background: rgba(251,191,36,0.07) !important; }
         .border-amber-100 { border-color: rgba(251,191,36,0.15) !important; }
-        .text-amber-700 { color: #fbbf24 !important; }
+        .text-amber-700 { color: var(--brand-amber) !important; }
 
         /* Config status items */
-        .bg-emerald-600 { background: #0a8a93 !important; }
+        .bg-emerald-600 { background: var(--brand-blue) !important; }
 
         /* Metric card hover dark */
         .metric-card:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.4) !important; }
 
         /* ===== SCORE BADGES ===== */
-        .badge-score-alto   { background: rgba(13,157,166,0.15); color: #2dd4cc; border: 1px solid rgba(13,157,166,0.25); }
-        .badge-score-medio  { background: rgba(251,191,36,0.12);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.22); }
-        .badge-score-bajo   { background: rgba(239,68,68,0.10);   color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+        .badge-score-alto   { background: rgba(34,199,217,0.15);  color: var(--brand-teal);   border: 1px solid rgba(34,199,217,0.3); }
+        .badge-score-medio  { background: rgba(251,191,36,0.12);  color: var(--brand-amber);  border: 1px solid rgba(251,191,36,0.22); }
+        .badge-score-bajo   { background: rgba(248,113,113,0.1);  color: var(--brand-red);    border: 1px solid rgba(248,113,113,0.2); }
 
         /* ===== ESTADO ATENDIDO ===== */
-        .badge-attended { background: rgba(99,102,241,0.12) !important; color: #a78bfa !important; }
+        .badge-attended { background: rgba(167,139,250,0.14) !important; color: var(--brand-violet) !important; }
 
         /* ===== ESTADO BUTTONS ===== */
         .estado-btn {
-            flex: 1; padding: 8px 4px; border-radius: 10px; border: 1px solid rgba(100,116,139,0.2);
+            flex: 1; padding: 8px 4px; border-radius: 10px; border: 1px solid rgba(173,188,203,0.2);
             font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-            background: transparent; color: #64748b;
+            background: transparent; color: var(--ink-400);
         }
-        .estado-btn:hover { border-color: rgba(100,116,139,0.4); color: #94a3b8; }
-        .estado-btn.active-pending   { background: rgba(251,191,36,0.12);  color: #fbbf24; border-color: rgba(251,191,36,0.3); }
-        .estado-btn.active-confirmed { background: rgba(13,157,166,0.12);  color: #2dd4cc; border-color: rgba(13,157,166,0.3); }
-        .estado-btn.active-attended  { background: rgba(99,102,241,0.12);  color: #a78bfa; border-color: rgba(99,102,241,0.3); }
+        .estado-btn:hover { border-color: rgba(173,188,203,0.4); color: var(--ink-200); }
+        .estado-btn.active-pending   { background: rgba(251,191,36,0.14);  color: var(--brand-amber);  border-color: rgba(251,191,36,0.3); }
+        .estado-btn.active-confirmed { background: rgba(50,213,131,0.14);  color: var(--brand-green);  border-color: rgba(50,213,131,0.3); }
+        .estado-btn.active-attended  { background: rgba(167,139,250,0.14); color: var(--brand-violet); border-color: rgba(167,139,250,0.3); }
 
         /* ===== 360° DRAWER ===== */
         #drawer-overlay {
@@ -182,8 +220,8 @@
         #drawer-panel {
             position: fixed !important; top: 0 !important; right: 0 !important;
             height: 100vh !important; width: 380px; max-width: 95vw;
-            background: #111c2e !important;
-            border-left: 1px solid rgba(100,116,139,0.25) !important;
+            background: #0B1626 !important;
+            border-left: 1px solid rgba(173,188,203,0.25) !important;
             z-index: 9999 !important;
             transform: translateX(100%);
             transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1);
@@ -191,10 +229,10 @@
         }
         #drawer-panel.open { transform: translateX(0) !important; display: flex !important; }
 
-        .drawer-section { border-bottom: 1px solid rgba(100,116,139,0.1); }
+        .drawer-section { border-bottom: 1px solid rgba(173,188,203,0.1); }
 
         tbody tr.lead-row { cursor: pointer; }
-        tbody tr.lead-row:hover td { background: rgba(13,157,166,0.04); }
+        tbody tr.lead-row:hover td { background: rgba(4,131,203,0.05); }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100">
@@ -214,18 +252,21 @@
     <div class="flex h-screen overflow-hidden">
 
         <!-- ===== SIDEBAR ===== -->
-        <aside class="w-60 gradient-sidebar flex flex-col flex-shrink-0">
+        <aside class="w-60 gradient-sidebar flex flex-col flex-shrink-0 relative overflow-hidden">
+            <svg width="280" height="280" viewBox="0 0 500 500" class="absolute -left-20 -bottom-20 opacity-[0.05] pointer-events-none select-none" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#ffffff"/>
+            </svg>
 
             <!-- Brand -->
             <div class="p-5 border-b border-white/10">
                 <div class="flex items-center gap-3">
                     <svg width="40" height="40" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg" class="rounded-xl flex-shrink-0">
-                        <rect width="500" height="500" rx="90" fill="#1B75BC"/>
-                        <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#1B75BC"/>
+                        <rect width="500" height="500" rx="90" fill="#0483CB"/>
+                        <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#0483CB"/>
                         <text x="185" y="295" font-family="Arial Black, sans-serif" font-weight="900" font-size="230" fill="white">K</text>
                     </svg>
                     <div>
-                        <p class="text-white font-bold text-sm leading-tight">Kyrios Comunicación</p>
+                        <p class="font-brand text-white font-bold text-sm leading-tight">Kyrios Comunicación</p>
                         <p class="text-teal-300 text-xs mt-0.5">Panel Demo Valentina</p>
                     </div>
                 </div>
@@ -268,7 +309,7 @@
             <!-- Sidebar footer -->
             <div class="p-4 border-t border-white/10">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">K</div>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#0483CB;">K</div>
                     <div>
                         <p class="text-xs font-semibold text-white">Demo comercial</p>
                         <p class="text-xs text-white/40">Kyrios Comunicación</p>
@@ -301,65 +342,44 @@
             <!-- ===== TAB: DASHBOARD ===== -->
             <div id="tab-dashboard" class="tab-content p-6 space-y-5">
 
-                <!-- KPI Cards -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="metric-card glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Turnos hoy</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
-                                    <span class="counter" data-target="8">0</span>
-                                </p>
-                                <p class="text-xs text-emerald-600 mt-1.5 font-semibold flex items-center gap-1">
-                                    <span>↑</span> +3 vs ayer
-                                </p>
-                            </div>
-                            <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center text-xl">📅</div>
+                <!-- KPI Strip -->
+                <div class="glass-card rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
+                    <svg width="120" height="120" viewBox="0 0 500 500" class="absolute -right-6 -top-10 opacity-[0.04] pointer-events-none select-none" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#0483CB"/>
+                    </svg>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-gray-50">
+                        <div class="p-5">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Turnos hoy</p>
+                            <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
+                                <span id="kpi-turnos-hoy">—</span>
+                            </p>
+                            <p class="text-xs mt-1.5 font-semibold" style="color:var(--ink-400);">Leads reales de hoy</p>
                         </div>
-                    </div>
 
-                    <div class="metric-card glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Leads semana</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
-                                    <span class="counter" data-target="47">0</span>
-                                </p>
-                                <p class="text-xs text-emerald-600 mt-1.5 font-semibold flex items-center gap-1">
-                                    <span>↑</span> +12 vs anterior
-                                </p>
-                            </div>
-                            <div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center text-xl">👥</div>
+                        <div class="p-5">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Leads semana</p>
+                            <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
+                                <span id="kpi-leads-semana">—</span>
+                            </p>
+                            <p class="text-xs mt-1.5 font-semibold" style="color:var(--ink-400);">Últimos 7 días</p>
                         </div>
-                    </div>
 
-                    <div class="metric-card glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Conversión</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
-                                    <span class="counter" data-target="73">0</span>%
-                                </p>
-                                <p class="text-xs text-emerald-600 mt-1.5 font-semibold flex items-center gap-1">
-                                    <span>↑</span> +5% vs mes ant.
-                                </p>
-                            </div>
-                            <div class="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center text-xl">📈</div>
+                        <div class="p-5">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Conversión</p>
+                            <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
+                                <span id="kpi-conversion">—</span>%
+                            </p>
+                            <p class="text-xs mt-1.5 font-semibold" style="color:var(--ink-400);">Leads / conversaciones</p>
                         </div>
-                    </div>
 
-                    <div class="metric-card glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Respuesta</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
-                                    0 <span class="text-base font-medium text-gray-400">min</span>
-                                </p>
-                                <p class="text-xs text-emerald-600 mt-1.5 font-semibold flex items-center gap-1">
-                                    ⚡ Instantáneo · 24hs
-                                </p>
-                            </div>
-                            <div class="w-11 h-11 bg-yellow-100 rounded-xl flex items-center justify-center text-xl">⚡</div>
+                        <div class="p-5">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Respuesta</p>
+                            <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
+                                0 <span class="text-base font-medium text-gray-400">min</span>
+                            </p>
+                            <p class="text-xs mt-1.5 font-semibold flex items-center gap-1" style="color:var(--brand-teal);">
+                                ⚡ Instantáneo · 24hs
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -372,9 +392,6 @@
                                 <h3 class="font-bold text-gray-800">Consultas por día</h3>
                                 <p class="text-xs text-gray-400 mt-0.5">Últimos 7 días</p>
                             </div>
-                            <span class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full font-semibold border border-emerald-100">
-                                ↑ +18% esta semana
-                            </span>
                         </div>
                         <canvas id="lineChart" height="90"></canvas>
                     </div>
@@ -382,30 +399,10 @@
                     <div class="glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
                         <div class="mb-4">
                             <h3 class="font-bold text-gray-800">Qué quieren resolver</h3>
-                            <p class="text-xs text-gray-400 mt-0.5">Este mes</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Necesidades reales más frecuentes</p>
                         </div>
-                        <canvas id="donutChart" height="150"></canvas>
-                        <div class="mt-4 space-y-2.5">
-                            <div class="flex items-center justify-between text-xs">
-                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span><span class="text-gray-600">Turnos / reservas</span></div>
-                                <span class="font-bold text-gray-800">31%</span>
-                            </div>
-                            <div class="flex items-center justify-between text-xs">
-                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block"></span><span class="text-gray-600">Consultas</span></div>
-                                <span class="font-bold text-gray-800">24%</span>
-                            </div>
-                            <div class="flex items-center justify-between text-xs">
-                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block"></span><span class="text-gray-600">Pedidos</span></div>
-                                <span class="font-bold text-gray-800">18%</span>
-                            </div>
-                            <div class="flex items-center justify-between text-xs">
-                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block"></span><span class="text-gray-600">Presupuestos</span></div>
-                                <span class="font-bold text-gray-800">18%</span>
-                            </div>
-                            <div class="flex items-center justify-between text-xs">
-                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-gray-200 inline-block"></span><span class="text-gray-600">Otros</span></div>
-                                <span class="font-bold text-gray-800">17%</span>
-                            </div>
+                        <div id="necesidades-top" class="space-y-3">
+                            <p class="text-xs text-gray-400">Todavía no hay datos suficientes.</p>
                         </div>
                     </div>
                 </div>
@@ -417,7 +414,12 @@
                         <button onclick="showTab('leads')" class="text-xs text-emerald-600 font-semibold hover:underline">Ver todos →</button>
                     </div>
                     <div id="actividad-reciente" class="space-y-1">
-                        <p class="text-xs text-gray-400 p-3">Cargando actividad real...</p>
+                        <div class="flex flex-col items-center text-center gap-2 py-8">
+                            <svg width="32" height="32" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg" class="opacity-20">
+                                <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#0483CB"/>
+                            </svg>
+                            <p class="text-xs text-gray-400">Cargando actividad real...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -517,7 +519,7 @@
             <div id="tab-accion" class="tab-content p-6 space-y-5 hidden">
 
                 <!-- Hero banner -->
-                <div class="rounded-2xl overflow-hidden relative" style="background: linear-gradient(135deg, #0f2a1e 0%, #1a5c45 50%, #2d7d67 100%);">
+                <div class="rounded-2xl overflow-hidden relative" style="background: linear-gradient(135deg, #080E18 0%, #0B3A5C 55%, #0483CB 100%);">
                     <div class="p-7 relative z-10">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="w-2 h-2 bg-green-400 rounded-full pulse"></div>
@@ -527,15 +529,15 @@
                         <p class="text-white/60 text-sm mt-2 max-w-lg">Atiende, califica y agenda turnos las 24 horas, los 7 días de la semana. Sin sueldos, sin ausencias, sin demoras.</p>
                         <div class="flex gap-4 mt-5">
                             <div class="bg-white/10 rounded-xl px-4 py-3 border border-white/15">
-                                <p class="text-white text-xl font-extrabold"><span class="counter2" data-target="247">0</span></p>
-                                <p class="text-white/50 text-xs mt-0.5">Consultas este mes</p>
+                                <p class="text-white text-xl font-extrabold"><span id="accion-conversaciones">—</span></p>
+                                <p class="text-white/50 text-xs mt-0.5">Conversaciones totales</p>
                             </div>
                             <div class="bg-white/10 rounded-xl px-4 py-3 border border-white/15">
                                 <p class="text-white text-xl font-extrabold">0 min</p>
                                 <p class="text-white/50 text-xs mt-0.5">Tiempo de respuesta</p>
                             </div>
                             <div class="bg-white/10 rounded-xl px-4 py-3 border border-white/15">
-                                <p class="text-white text-xl font-extrabold"><span class="counter2" data-target="73">0</span>%</p>
+                                <p class="text-white text-xl font-extrabold"><span id="accion-conversion">—</span>%</p>
                                 <p class="text-white/50 text-xs mt-0.5">Tasa de conversión</p>
                             </div>
                         </div>
@@ -614,7 +616,7 @@
                     <div class="glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
                         <div class="mb-4">
                             <h3 class="font-bold text-gray-800">Horarios de consulta</h3>
-                            <p class="text-xs text-gray-400 mt-0.5">El <span class="text-emerald-600 font-bold">41%</span> de los mensajes llega fuera del horario laboral</p>
+                            <p class="text-xs text-gray-400 mt-0.5">El <span id="pct-fuera-horario" class="text-emerald-600 font-bold">—</span>% de los mensajes llega fuera del horario laboral</p>
                         </div>
                         <canvas id="hoursChart" height="130"></canvas>
                         <div class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-100">
@@ -652,47 +654,47 @@
 
                 <!-- Lo que hace Valentina -->
                 <div class="glass-card rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h3 class="font-bold text-gray-800 mb-5">Todo lo que hace Valentina por vos</h3>
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
-                            <div class="text-3xl mb-2">💬</div>
-                            <p class="text-sm font-semibold text-gray-800">Atiende consultas</p>
-                            <p class="text-xs text-gray-400 mt-1">24hs · 7 días</p>
+                    <h3 class="font-bold text-gray-800 mb-4">Todo lo que hace Valentina por vos</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-10">
+                        <div class="flex items-center gap-3 py-3 border-b border-gray-50">
+                            <span class="text-lg flex-shrink-0 w-6 text-center">💬</span>
+                            <p class="text-sm font-semibold text-gray-800 flex-1">Atiende consultas</p>
+                            <p class="text-xs text-gray-400 whitespace-nowrap">24hs · 7 días</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
-                            <div class="text-3xl mb-2">🎯</div>
-                            <p class="text-sm font-semibold text-gray-800">Califica prospectos</p>
-                            <p class="text-xs text-gray-400 mt-1">3 preguntas clave</p>
+                        <div class="flex items-center gap-3 py-3 border-b border-gray-50">
+                            <span class="text-lg flex-shrink-0 w-6 text-center">🎯</span>
+                            <p class="text-sm font-semibold text-gray-800 flex-1">Califica prospectos</p>
+                            <p class="text-xs text-gray-400 whitespace-nowrap">3 preguntas clave</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
-                            <div class="text-3xl mb-2">📅</div>
-                            <p class="text-sm font-semibold text-gray-800">Agenda turnos</p>
-                            <p class="text-xs text-gray-400 mt-1">Automáticamente</p>
+                        <div class="flex items-center gap-3 py-3 border-b border-gray-50">
+                            <span class="text-lg flex-shrink-0 w-6 text-center">📅</span>
+                            <p class="text-sm font-semibold text-gray-800 flex-1">Agenda turnos</p>
+                            <p class="text-xs text-gray-400 whitespace-nowrap">Automáticamente</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
-                            <div class="text-3xl mb-2">📊</div>
-                            <p class="text-sm font-semibold text-gray-800">Registra leads</p>
-                            <p class="text-xs text-gray-400 mt-1">En tiempo real</p>
+                        <div class="flex items-center gap-3 py-3 border-b border-gray-50">
+                            <span class="text-lg flex-shrink-0 w-6 text-center">📊</span>
+                            <p class="text-sm font-semibold text-gray-800 flex-1">Registra leads</p>
+                            <p class="text-xs text-gray-400 whitespace-nowrap">En tiempo real</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
-                            <div class="text-3xl mb-2">🛡️</div>
-                            <p class="text-sm font-semibold text-gray-800">Detecta contraindicaciones</p>
-                            <p class="text-xs text-gray-400 mt-1">Protege al negocio</p>
+                        <div class="flex items-center gap-3 py-3 border-b border-gray-50 sm:border-b-0">
+                            <span class="text-lg flex-shrink-0 w-6 text-center">🛡️</span>
+                            <p class="text-sm font-semibold text-gray-800 flex-1">Detecta contraindicaciones</p>
+                            <p class="text-xs text-gray-400 whitespace-nowrap">Protege al negocio</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
-                            <div class="text-3xl mb-2">🗣️</div>
-                            <p class="text-sm font-semibold text-gray-800">Habla como vos</p>
-                            <p class="text-xs text-gray-400 mt-1">Tono de la marca</p>
+                        <div class="flex items-center gap-3 py-3 border-b border-gray-50 sm:border-b-0">
+                            <span class="text-lg flex-shrink-0 w-6 text-center">🗣️</span>
+                            <p class="text-sm font-semibold text-gray-800 flex-1">Habla como vos</p>
+                            <p class="text-xs text-gray-400 whitespace-nowrap">Tono de la marca</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
-                            <div class="text-3xl mb-2">📍</div>
-                            <p class="text-sm font-semibold text-gray-800">Cualquier rubro</p>
-                            <p class="text-xs text-gray-400 mt-1">Se adapta a tu negocio</p>
+                        <div class="flex items-center gap-3 py-3">
+                            <span class="text-lg flex-shrink-0 w-6 text-center">📍</span>
+                            <p class="text-sm font-semibold text-gray-800 flex-1">Cualquier rubro</p>
+                            <p class="text-xs text-gray-400 whitespace-nowrap">Se adapta a tu negocio</p>
                         </div>
-                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
-                            <div class="text-3xl mb-2">⚡</div>
-                            <p class="text-sm font-semibold text-gray-800">Escala ilimitado</p>
-                            <p class="text-xs text-gray-400 mt-1">100 chats a la vez</p>
+                        <div class="flex items-center gap-3 py-3">
+                            <span class="text-lg flex-shrink-0 w-6 text-center">⚡</span>
+                            <p class="text-sm font-semibold text-gray-800 flex-1">Escala ilimitado</p>
+                            <p class="text-xs text-gray-400 whitespace-nowrap">100 chats a la vez</p>
                         </div>
                     </div>
                 </div>
@@ -774,10 +776,10 @@
         <!-- Header del drawer -->
         <div class="drawer-section p-5 flex items-start justify-between gap-3">
             <div class="flex items-center gap-4">
-                <div id="d-avatar" class="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-extrabold text-white flex-shrink-0" style="background: linear-gradient(135deg,#0a8a93,#0d9488);"></div>
+                <div id="d-avatar" class="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-extrabold text-white flex-shrink-0" style="background: linear-gradient(135deg,#0369A3,#22C7D9);"></div>
                 <div>
                     <p id="d-name" class="font-bold text-white text-lg leading-tight"></p>
-                    <p id="d-phone" class="text-xs mt-0.5" style="color:#64748b;"></p>
+                    <p id="d-phone" class="text-xs mt-0.5" style="color:#728197;"></p>
                     <div class="flex items-center gap-2 mt-1.5">
                         <span id="d-score-badge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold"></span>
                         <span id="d-estado-badge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold"></span>
@@ -789,7 +791,7 @@
 
         <!-- Cambiar estado -->
         <div class="drawer-section p-5">
-            <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color:#475569;">Estado del lead</p>
+            <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color:#8291A3;">Estado del lead</p>
             <div style="display:flex; gap:8px;">
                 <button class="estado-btn" id="btn-pending"   onclick="cambiarEstado('pending')">⏳ Pendiente</button>
                 <button class="estado-btn" id="btn-confirmed" onclick="cambiarEstado('confirmed')">✅ Confirmado</button>
@@ -799,22 +801,22 @@
 
         <!-- Datos del turno -->
         <div class="drawer-section p-5 space-y-3">
-            <p class="text-xs font-bold uppercase tracking-wider" style="color:#475569;">Turno agendado</p>
+            <p class="text-xs font-bold uppercase tracking-wider" style="color:#8291A3;">Turno agendado</p>
             <div class="grid grid-cols-2 gap-3">
-                <div style="background:#1e293b;" class="rounded-xl p-3">
-                    <p class="text-xs mb-1" style="color:#64748b;">Necesidad</p>
+                <div style="background:#111E2E;" class="rounded-xl p-3">
+                    <p class="text-xs mb-1" style="color:#728197;">Necesidad</p>
                     <p id="d-tratamiento" class="text-sm font-semibold text-white"></p>
                 </div>
-                <div style="background:#1e293b;" class="rounded-xl p-3">
-                    <p class="text-xs mb-1" style="color:#64748b;">Negocio / Rubro</p>
+                <div style="background:#111E2E;" class="rounded-xl p-3">
+                    <p class="text-xs mb-1" style="color:#728197;">Negocio / Rubro</p>
                     <p id="d-sucursal" class="text-sm font-semibold text-white"></p>
                 </div>
-                <div style="background:#1e293b;" class="rounded-xl p-3">
-                    <p class="text-xs mb-1" style="color:#64748b;">Horario preferido</p>
+                <div style="background:#111E2E;" class="rounded-xl p-3">
+                    <p class="text-xs mb-1" style="color:#728197;">Horario preferido</p>
                     <p id="d-horario" class="text-sm font-semibold text-white"></p>
                 </div>
-                <div style="background:#1e293b;" class="rounded-xl p-3">
-                    <p class="text-xs mb-1" style="color:#64748b;">Contacto</p>
+                <div style="background:#111E2E;" class="rounded-xl p-3">
+                    <p class="text-xs mb-1" style="color:#728197;">Contacto</p>
                     <p id="d-fecha" class="text-sm font-semibold text-white"></p>
                 </div>
             </div>
@@ -822,33 +824,33 @@
 
         <!-- Score IA explicado -->
         <div class="drawer-section p-5">
-            <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color:#475569;">Análisis IA</p>
-            <div style="background:#1e293b;" class="rounded-xl p-4 space-y-2">
+            <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color:#8291A3;">Análisis IA</p>
+            <div style="background:#111E2E;" class="rounded-xl p-4 space-y-2">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs" style="color:#94a3b8;">Probabilidad de conversión</span>
+                    <span class="text-xs" style="color:#AEBBCB;">Probabilidad de conversión</span>
                     <span id="d-prob" class="text-sm font-bold text-white"></span>
                 </div>
                 <div class="w-full rounded-full h-1.5" style="background:#0f172a;">
-                    <div id="d-prob-bar" class="h-1.5 rounded-full transition-all duration-700" style="background:linear-gradient(90deg,#0a8a93,#0d9da6);"></div>
+                    <div id="d-prob-bar" class="h-1.5 rounded-full transition-all duration-700" style="background:linear-gradient(90deg,#0369A3,#0483CB);"></div>
                 </div>
-                <p id="d-score-reason" class="text-xs pt-1" style="color:#64748b;"></p>
+                <p id="d-score-reason" class="text-xs pt-1" style="color:#728197;"></p>
             </div>
         </div>
 
         <!-- Timeline -->
         <div class="drawer-section p-5">
-            <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color:#475569;">Historial de interacción</p>
+            <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color:#8291A3;">Historial de interacción</p>
             <div id="d-timeline" class="space-y-3"></div>
         </div>
 
         <!-- Notas -->
         <div class="p-5">
-            <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:#475569;">Notas internas</p>
+            <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:#8291A3;">Notas internas</p>
             <textarea id="d-notas" rows="3" placeholder="Agregar nota sobre este contacto..."
                 class="w-full rounded-xl text-sm p-3 resize-none outline-none transition-colors"
-                style="background:#1e293b; color:#e2e8f0; border:1px solid rgba(100,116,139,0.2);"
+                style="background:#111E2E; color:#E7ECF1; border:1px solid rgba(173,188,203,0.2);"
                 onfocus="this.style.borderColor='rgba(13,157,166,0.4)'"
-                onblur="this.style.borderColor='rgba(100,116,139,0.2)'"></textarea>
+                onblur="this.style.borderColor='rgba(173,188,203,0.2)'"></textarea>
             <button onclick="guardarNota()" class="mt-2 w-full bg-emerald-700 hover:bg-emerald-600 text-white text-sm py-2 rounded-xl font-medium transition-colors">
                 Guardar nota
             </button>
@@ -856,28 +858,28 @@
     </div>
 
     <!-- FOOTER -->
-    <footer style="background:#0d1829; border-top:1px solid rgba(100,116,139,0.15);" class="py-5 px-8">
+    <footer style="background:#080E18; border-top:1px solid rgba(173,188,203,0.15);" class="py-5 px-8">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
 
             <!-- Logo Kyrios SVG -->
             <div class="flex items-center gap-3">
                 <svg width="38" height="38" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="500" height="500" rx="90" fill="#1B75BC"/>
+                    <rect width="500" height="500" rx="90" fill="#0483CB"/>
                     <path d="M155 130 L155 280 L230 200 L320 280 L320 130" stroke="white" stroke-width="0" fill="none"/>
                     <!-- Speech bubble tail -->
-                    <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#1B75BC"/>
+                    <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#0483CB"/>
                     <!-- K letter -->
                     <text x="185" y="295" font-family="Arial Black, sans-serif" font-weight="900" font-size="230" fill="white">K</text>
                 </svg>
                 <div class="leading-tight">
-                    <p class="font-extrabold text-white tracking-widest text-sm uppercase">KYRIOS</p>
-                    <p class="text-xs tracking-[0.25em] uppercase" style="color:#94a3b8;">Comunicación</p>
+                    <p class="font-brand font-bold text-white tracking-wide text-sm uppercase">KYRIOS</p>
+                    <p class="text-xs tracking-[0.2em] uppercase" style="color:var(--ink-400);">Comunicación</p>
                 </div>
             </div>
 
             <!-- Texto -->
-            <p class="text-xs text-center" style="color:#64748b;">
-                Desarrollado por <span class="text-slate-400 font-semibold">Kyrios Comunicación</span> &nbsp;·&nbsp; Todos los derechos reservados &copy; 2026
+            <p class="text-xs text-center" style="color:var(--ink-600);">
+                Desarrollado por <span class="font-semibold" style="color:var(--ink-200);">Kyrios Comunicación</span> &nbsp;·&nbsp; Todos los derechos reservados &copy; 2026
             </p>
 
         </div>
@@ -941,7 +943,13 @@
             const container = document.getElementById('actividad-reciente');
             if (!container) return;
             if (!leadsData.length) {
-                container.innerHTML = '<p class="text-xs text-gray-400 p-3">Todavía no hay prospectos registrados.</p>';
+                container.innerHTML = `
+                    <div class="flex flex-col items-center text-center gap-2 py-8">
+                        <svg width="32" height="32" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg" class="opacity-20">
+                            <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#0483CB"/>
+                        </svg>
+                        <p class="text-xs text-gray-400">Todavía no hay prospectos registrados.</p>
+                    </div>`;
                 return;
             }
             container.innerHTML = leadsData.slice(0, 4).map(l => `
@@ -1083,7 +1091,7 @@
             // Score bar
             document.getElementById('d-prob').textContent = score.pct + '%';
             document.getElementById('d-prob-bar').style.width = score.pct + '%';
-            const barColors = { Alto: 'linear-gradient(90deg,#0a8a93,#0d9da6)', Medio: 'linear-gradient(90deg,#d97706,#fbbf24)', Bajo: 'linear-gradient(90deg,#dc2626,#f87171)' };
+            const barColors = { Alto: 'linear-gradient(90deg,#0369A3,#0483CB)', Medio: 'linear-gradient(90deg,#d97706,#fbbf24)', Bajo: 'linear-gradient(90deg,#dc2626,#f87171)' };
             document.getElementById('d-prob-bar').style.background = barColors[score.nivel];
             document.getElementById('d-score-reason').textContent = score.razon;
 
@@ -1096,10 +1104,10 @@
             ];
             timeline.innerHTML = events.map(e => `
                 <div class="flex items-start gap-3">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center text-sm flex-shrink-0" style="background:#1e293b;">${e.icon}</div>
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center text-sm flex-shrink-0" style="background:#111E2E;">${e.icon}</div>
                     <div>
                         <p class="text-xs text-white font-medium">${e.text}</p>
-                        <p class="text-xs mt-0.5" style="color:#475569;">${e.time}</p>
+                        <p class="text-xs mt-0.5" style="color:#8291A3;">${e.time}</p>
                     </div>
                 </div>
             `).join('');
@@ -1185,24 +1193,57 @@
             }, 360);
         }
 
+        // ===== ESTADÍSTICAS REALES =====
+        let statsData = null;
+        let chartLine = null;
+        let chartHours = null;
+
+        async function cargarEstadisticas() {
+            try {
+                const res = await fetch(`${API_BASE}/api/stats?token=${API_TOKEN}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                statsData = await res.json();
+                renderStatsUI();
+                renderCharts();
+            } catch (e) {
+                console.error("[Dashboard] Error cargando estadísticas:", e);
+            }
+        }
+
+        function renderStatsUI() {
+            if (!statsData) return;
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            set('kpi-turnos-hoy', statsData.turnos_hoy);
+            set('kpi-leads-semana', statsData.leads_semana);
+            set('kpi-conversion', statsData.tasa_conversion);
+            set('accion-conversaciones', statsData.total_conversaciones);
+            set('accion-conversion', statsData.tasa_conversion);
+            set('pct-fuera-horario', statsData.pct_fuera_horario);
+
+            const cont = document.getElementById('necesidades-top');
+            if (cont) {
+                if (!statsData.necesidades_top.length) {
+                    cont.innerHTML = '<p class="text-xs text-gray-400">Todavía no hay datos suficientes.</p>';
+                } else {
+                    const max = Math.max(...statsData.necesidades_top.map(n => n.cantidad));
+                    cont.innerHTML = statsData.necesidades_top.map(n => `
+                        <div>
+                            <div class="flex items-center justify-between text-xs mb-1">
+                                <span class="text-gray-600 truncate pr-2">${n.necesidad}</span>
+                                <span class="font-bold text-gray-800 flex-shrink-0">${n.cantidad}</span>
+                            </div>
+                            <div class="w-full rounded-full h-1.5" style="background:var(--navy-700);">
+                                <div class="h-1.5 rounded-full" style="width:${(n.cantidad / max * 100)}%; background:var(--brand-blue);"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
         // ===== TABS =====
         const tabs = ['dashboard', 'leads', 'conversaciones', 'accion', 'config'];
         const titles = { dashboard: 'Dashboard', leads: 'Gestión de Leads', conversaciones: 'Conversaciones', accion: 'Valentina en Acción', config: 'Configuración' };
-
-        function animateCounters2() {
-            document.querySelectorAll('.counter2').forEach(el => {
-                const target = parseInt(el.dataset.target);
-                const steps = 60;
-                const step = target / steps;
-                let current = 0, count = 0;
-                const timer = setInterval(() => {
-                    count++;
-                    current = Math.min(current + step, target);
-                    el.textContent = Math.floor(current);
-                    if (count >= steps) clearInterval(timer);
-                }, 1800 / steps);
-            });
-        }
 
         function showTab(tab) {
             tabs.forEach(t => {
@@ -1220,68 +1261,68 @@
             document.getElementById(`nav-${tab}`).classList.remove('text-white/60');
             document.getElementById('page-title').textContent = titles[tab];
             if (tab === 'conversaciones') renderMessages(0);
-            if (tab === 'accion') { animateCounters2(); initCharts(); }
+            if (tab === 'accion' && chartHours) chartHours.resize();
         }
 
-        // ===== COUNTERS =====
-        function animateCounter(el) {
-            const target = parseInt(el.dataset.target);
-            const duration = 1800;
-            const steps = 60;
-            const step = target / steps;
-            let current = 0, count = 0;
-            const timer = setInterval(() => {
-                count++;
-                current = Math.min(current + step, target);
-                el.textContent = Math.floor(current);
-                if (count >= steps) clearInterval(timer);
-            }, duration / steps);
-        }
+        // ===== CHARTS (crea si no existe, actualiza si ya existe — evita duplicar instancias) =====
+        function renderCharts() {
+            if (!statsData) return;
 
-        // ===== CHARTS =====
-        function initCharts() {
-            new Chart(document.getElementById('lineChart'), {
-                type: 'line',
-                data: {
-                    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                    datasets: [{
-                        label: 'Consultas',
-                        data: [23, 31, 28, 45, 38, 52, 47],
-                        borderColor: '#0d9da6',
-                        backgroundColor: 'rgba(13,157,166,0.07)',
-                        borderWidth: 2.5,
-                        pointBackgroundColor: '#0d9da6',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        tension: 0.4,
-                        fill: true,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', padding: 10, cornerRadius: 10 } },
-                    scales: {
-                        y: { beginAtZero: false, min: 10, grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: { size: 11 } } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } }
-                    },
-                    animation: { duration: 1800, easing: 'easeInOutQuart' }
-                }
-            });
-
-            // Hours chart
-            if (document.getElementById('hoursChart')) {
-                new Chart(document.getElementById('hoursChart'), {
-                    type: 'bar',
+            const dias = statsData.consultas_por_dia.map(d => d.dia);
+            const consultasDia = statsData.consultas_por_dia.map(d => d.cantidad);
+            if (chartLine) {
+                chartLine.data.labels = dias;
+                chartLine.data.datasets[0].data = consultasDia;
+                chartLine.update();
+            } else if (document.getElementById('lineChart')) {
+                chartLine = new Chart(document.getElementById('lineChart'), {
+                    type: 'line',
                     data: {
-                        labels: ['8hs','10hs','12hs','14hs','16hs','18hs','20hs','22hs','0hs','2hs'],
+                        labels: dias,
                         datasets: [{
                             label: 'Consultas',
-                            data: [12, 28, 22, 35, 31, 24, 38, 29, 14, 8],
+                            data: consultasDia,
+                            borderColor: '#0483CB',
+                            backgroundColor: 'rgba(4,131,203,0.07)',
+                            borderWidth: 2.5,
+                            pointBackgroundColor: '#0483CB',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            tension: 0.4,
+                            fill: true,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#111E2E', padding: 10, cornerRadius: 10 } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#E7ECF1' }, ticks: { color: '#AEBBCB', font: { size: 11 } } },
+                            x: { grid: { display: false }, ticks: { color: '#AEBBCB', font: { size: 11 } } }
+                        },
+                        animation: { duration: 900, easing: 'easeInOutQuart' }
+                    }
+                });
+            }
+
+            const horas = statsData.consultas_por_hora.map(h => h.hora);
+            const consultasHora = statsData.consultas_por_hora.map(h => h.cantidad);
+            if (chartHours) {
+                chartHours.data.labels = horas;
+                chartHours.data.datasets[0].data = consultasHora;
+                chartHours.update();
+            } else if (document.getElementById('hoursChart')) {
+                chartHours = new Chart(document.getElementById('hoursChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: horas,
+                        datasets: [{
+                            label: 'Consultas',
+                            data: consultasHora,
                             backgroundColor: (ctx) => {
                                 const idx = ctx.dataIndex;
-                                // Fuera de horario laboral (20hs en adelante y madrugada)
-                                return idx >= 6 ? '#f59e0b' : '#0d9da6';
+                                // Fuera de horario laboral (20hs en adelante y madrugada) — mismo criterio que pct_fuera_horario en el backend
+                                return idx >= 6 ? '#f59e0b' : '#0483CB';
                             },
                             borderRadius: 6,
                             borderSkipped: false,
@@ -1291,35 +1332,16 @@
                         responsive: true,
                         plugins: {
                             legend: { display: false },
-                            tooltip: { backgroundColor: '#1e293b', padding: 10, cornerRadius: 10 }
+                            tooltip: { backgroundColor: '#111E2E', padding: 10, cornerRadius: 10 }
                         },
                         scales: {
-                            y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                            y: { beginAtZero: true, grid: { color: '#E7ECF1' }, ticks: { color: '#AEBBCB', font: { size: 10 } } },
+                            x: { grid: { display: false }, ticks: { color: '#AEBBCB', font: { size: 10 } } }
                         },
-                        animation: { duration: 1800, easing: 'easeInOutQuart' }
+                        animation: { duration: 900, easing: 'easeInOutQuart' }
                     }
                 });
             }
-
-            new Chart(document.getElementById('donutChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Turnos / reservas', 'Consultas', 'Pedidos', 'Presupuestos', 'Otros'],
-                    datasets: [{
-                        data: [28, 22, 18, 15, 17],
-                        backgroundColor: ['#0d9da6', '#60a5fa', '#a78bfa', '#fbbf24', '#e2e8f0'],
-                        borderWidth: 0,
-                        hoverOffset: 8,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    cutout: '72%',
-                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', padding: 10, cornerRadius: 10 } },
-                    animation: { duration: 1800, easing: 'easeInOutQuart' }
-                }
-            });
         }
 
         // ===== TOAST =====
@@ -1340,10 +1362,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             cargarLeads();
             cargarConversaciones();
+            cargarEstadisticas();
             setInterval(cargarLeads, 15000);
             setInterval(cargarConversaciones, 15000);
-            document.querySelectorAll('.counter').forEach(animateCounter);
-            initCharts();
+            setInterval(cargarEstadisticas, 15000);
         });
     </script>
 </body>

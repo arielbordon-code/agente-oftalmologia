@@ -5,7 +5,8 @@ Módulo para registrar leads calificados en Google Sheets.
 import gspread
 from gspread_formatting import CellFormat, Color, TextFormat, set_frozen, format_cell_range
 from google.oauth2.service_account import Credentials
-from datetime import datetime
+from datetime import datetime, timedelta
+from collections import Counter
 import os
 import json
 
@@ -218,3 +219,120 @@ def actualizar_notas(fila: int, notas: str) -> bool:
         except Exception as e:
             print(f"[Sheets] Error actualizando notas (intento {intento + 1}/3): {type(e).__name__}: {e}")
     return False
+
+
+ACTIVIDAD_HEADERS = ["FechaHora", "Teléfono"]
+
+
+def _get_actividad_sheet():
+    spreadsheet = get_client().open_by_key(SHEET_ID)
+    try:
+        return spreadsheet.worksheet("Actividad")
+    except gspread.WorksheetNotFound:
+        sheet = spreadsheet.add_worksheet(title="Actividad", rows=2000, cols=2)
+        sheet.append_row(ACTIVIDAD_HEADERS)
+        return sheet
+
+
+def registrar_inicio_conversacion(telefono: str) -> None:
+    """Loguea el arranque de una conversación nueva (para estadísticas de
+    actividad real). No crítico: un solo intento, nunca bloquea el chat."""
+    try:
+        _get_actividad_sheet().append_row([datetime.now().strftime("%d/%m/%Y %H:%M"), telefono])
+    except Exception as e:
+        print(f"[Sheets] No se pudo registrar inicio de conversación: {type(e).__name__}: {e}")
+
+
+DIAS_SEMANA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+BUCKETS_HORA = ["8hs", "10hs", "12hs", "14hs", "16hs", "18hs", "20hs", "22hs", "0hs", "2hs"]
+
+
+def _bucket_hora(hora: int) -> str:
+    if 8 <= hora <= 9:   return "8hs"
+    if 10 <= hora <= 11: return "10hs"
+    if 12 <= hora <= 13: return "12hs"
+    if 14 <= hora <= 15: return "14hs"
+    if 16 <= hora <= 17: return "16hs"
+    if 18 <= hora <= 19: return "18hs"
+    if 20 <= hora <= 21: return "20hs"
+    if 22 <= hora <= 23: return "22hs"
+    if 0 <= hora <= 1:   return "0hs"
+    return "2hs"  # 2..7
+
+
+def obtener_estadisticas() -> dict:
+    """Agrega leads reales + log de conversaciones en los números/gráficos
+    que hoy son fijos en el dashboard."""
+    leads = listar_leads(limite=10000)
+    try:
+        filas_actividad = _get_actividad_sheet().get_all_values()[1:]
+    except Exception as e:
+        print(f"[Sheets] Error leyendo Actividad: {type(e).__name__}: {e}")
+        filas_actividad = []
+
+    hoy = datetime.now().date()
+    hace_7_dias = hoy - timedelta(days=6)
+
+    def _parsear_fecha(fecha_str):
+        try:
+            return datetime.strptime(fecha_str, "%d/%m/%Y %H:%M")
+        except ValueError:
+            return None
+
+    turnos_hoy = 0
+    leads_semana = 0
+    for lead in leads:
+        dt = _parsear_fecha(lead["fecha"])
+        if not dt:
+            continue
+        if dt.date() == hoy:
+            turnos_hoy += 1
+        if dt.date() >= hace_7_dias:
+            leads_semana += 1
+
+    conteo_por_dia = Counter()
+    conteo_por_hora = Counter()
+    fuera_horario = 0
+    total_conversaciones = 0
+    for fila in filas_actividad:
+        if not fila or len(fila) < 1:
+            continue
+        dt = _parsear_fecha(fila[0])
+        if not dt:
+            continue
+        total_conversaciones += 1
+        if dt.date() >= hace_7_dias:
+            conteo_por_dia[dt.date()] += 1
+        bucket = _bucket_hora(dt.hour)
+        conteo_por_hora[bucket] += 1
+        if bucket in ("20hs", "22hs", "0hs", "2hs"):
+            fuera_horario += 1
+
+    consultas_por_dia = []
+    for i in range(7):
+        dia = hace_7_dias + timedelta(days=i)
+        consultas_por_dia.append({
+            "dia": DIAS_SEMANA[dia.weekday()],
+            "cantidad": conteo_por_dia.get(dia, 0),
+        })
+
+    consultas_por_hora = [{"hora": b, "cantidad": conteo_por_hora.get(b, 0)} for b in BUCKETS_HORA]
+
+    necesidades = Counter(l["necesidad"].strip() for l in leads if l["necesidad"].strip())
+    necesidades_top = [{"necesidad": n, "cantidad": c} for n, c in necesidades.most_common(8)]
+
+    total_leads = len(leads)
+    tasa_conversion = round(total_leads / total_conversaciones * 100, 1) if total_conversaciones else 0.0
+    pct_fuera_horario = round(fuera_horario / total_conversaciones * 100, 1) if total_conversaciones else 0.0
+
+    return {
+        "turnos_hoy": turnos_hoy,
+        "leads_semana": leads_semana,
+        "total_leads": total_leads,
+        "total_conversaciones": total_conversaciones,
+        "tasa_conversion": tasa_conversion,
+        "pct_fuera_horario": pct_fuera_horario,
+        "consultas_por_dia": consultas_por_dia,
+        "consultas_por_hora": consultas_por_hora,
+        "necesidades_top": necesidades_top,
+    }

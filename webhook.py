@@ -18,7 +18,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from twilio.request_validator import RequestValidator
 from dotenv import load_dotenv
 from agent import OftalmologiaAgent as EsteticaAgent
-from sheets import listar_leads, actualizar_estado, actualizar_notas, ESTADO_A_TEXTO
+from sheets import listar_leads, actualizar_estado, actualizar_notas, ESTADO_A_TEXTO, obtener_estadisticas
 
 load_dotenv()
 
@@ -110,6 +110,14 @@ def api_conversaciones():
         return jsonify({"error": "unauthorized"}), 401
     conversaciones = agent.to_dashboard_list()
     return jsonify({"conversaciones": conversaciones, "total": len(conversaciones)})
+
+
+@app.route("/api/stats", methods=["GET"])
+def api_stats():
+    """Estadísticas agregadas reales (KPIs y gráficos del dashboard)."""
+    if not _token_valido():
+        return jsonify({"error": "unauthorized"}), 401
+    return jsonify(obtener_estadisticas())
 
 
 @app.route("/api/leads/<int:fila>/estado", methods=["POST"])

@@ -10,7 +10,7 @@ import time
 from anthropic import Anthropic
 from dataclasses import dataclass, field
 from typing import Optional
-from sheets import registrar_lead
+from sheets import registrar_lead, registrar_inicio_conversacion
 from dashboard_utils import obtener_iniciales, asignar_color
 
 SYSTEM_PROMPT = """Sos Valentina, la demo en vivo de un agente de IA para WhatsApp. Quien te escribe es un prospecto probando la demo para decidir si contratar el servicio — NO es un cliente real de ningún negocio. Tu objetivo es que, después de ver cómo trabajás, quiera contratar un agente como vos para su propio negocio.
@@ -92,6 +92,7 @@ class OftalmologiaAgent:
     def get_or_create_conversation(self, phone_number: str) -> Conversation:
         if phone_number not in self.conversations:
             self.conversations[phone_number] = Conversation(phone_number=phone_number)
+            registrar_inicio_conversacion(phone_number)
         return self.conversations[phone_number]
 
     def reset_conversation(self, phone_number: str) -> None:
