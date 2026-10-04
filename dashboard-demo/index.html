@@ -1,0 +1,1324 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kyrios — Panel Demo Valentina</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+
+        .gradient-sidebar { background: linear-gradient(180deg, #062a30 0%, #0a4a52 100%); }
+        .gradient-header  { background: linear-gradient(135deg, #0a4a52 0%, #0d9da6 100%); }
+
+        .metric-card {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.10);
+        }
+
+        .nav-item { transition: all 0.2s ease; }
+        .nav-item.active {
+            background: rgba(45, 125, 103, 0.18);
+            color: #4ade80;
+            border-right: 3px solid #4ade80;
+        }
+        .nav-item:not(.active):hover { background: rgba(255,255,255,0.06); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(110%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0);    opacity: 1; }
+            to   { transform: translateX(110%); opacity: 0; }
+        }
+        .toast-enter { animation: slideInRight 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+        .toast-exit  { animation: slideOutRight 0.35s ease forwards; }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1;   transform: scale(1); }
+            50%       { opacity: 0.5; transform: scale(1.2); }
+        }
+        .pulse { animation: pulse-dot 2s infinite; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .tab-content { animation: fadeUp 0.35s ease forwards; }
+
+        .bubble-valentina {
+            background: #e8f5e9;
+            border-radius: 4px 14px 14px 14px;
+        }
+        .bubble-user {
+            background: #dcf8c6;
+            border-radius: 14px 4px 14px 14px;
+        }
+
+        .badge-pending   { background: #fef3c7; color: #92400e; }
+        .badge-confirmed { background: #d0f4f5; color: #065a60; }
+        .badge-cancelled { background: #fee2e2; color: #991b1b; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        .glass-card {
+            background: #1e293b;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ===== DARK THEME ===== */
+        body { background: #0b1120 !important; color: #e2e8f0; }
+
+        header { background: #1e293b !important; border-color: rgba(100,116,139,0.15) !important; }
+        header h1 { color: #f1f5f9 !important; }
+        header p  { color: #64748b !important; }
+
+        .text-gray-800 { color: #f1f5f9 !important; }
+        .text-gray-700 { color: #e2e8f0 !important; }
+        .text-gray-600 { color: #94a3b8 !important; }
+        .text-gray-500 { color: #64748b !important; }
+        .text-gray-400 { color: #475569 !important; }
+
+        .bg-white   { background: #1e293b !important; }
+        .bg-gray-50 { background: #131f30 !important; }
+        .bg-gray-100{ background: #1a2b40 !important; }
+
+        .border-gray-100 { border-color: rgba(100,116,139,0.12) !important; }
+        .border-gray-200 { border-color: rgba(100,116,139,0.18) !important; }
+        .divide-gray-50 > * + * { border-color: rgba(100,116,139,0.1) !important; }
+
+        .hover\:bg-gray-50:hover { background: rgba(30,45,70,0.8) !important; }
+
+        input, select, textarea {
+            background: #131f30 !important;
+            color: #e2e8f0 !important;
+            border-color: rgba(100,116,139,0.2) !important;
+        }
+        input::placeholder { color: #475569 !important; }
+
+        /* Table */
+        thead { background: #131f30 !important; }
+        th.text-gray-400 { color: #475569 !important; }
+        tbody tr:hover { background: rgba(30,45,70,0.6) !important; }
+
+        /* Badges dark */
+        .badge-pending   { background: rgba(251,191,36,0.12)  !important; color: #fbbf24 !important; }
+        .badge-confirmed { background: rgba(13,157,166,0.12)  !important; color: #2dd4cc !important; }
+        .badge-cancelled { background: rgba(239,68,68,0.12)   !important; color: #f87171 !important; }
+
+        /* Chat */
+        .bubble-valentina { background: rgba(13,157,166,0.12) !important; color: #e2e8f0 !important; }
+        .bubble-user      { background: rgba(59,130,246,0.15) !important; color: #e2e8f0 !important; }
+        #chat-messages    { background: #0b1120 !important; }
+
+        /* Emerald tones on dark */
+        .bg-emerald-50  { background: rgba(13,157,166,0.08) !important; }
+        .bg-emerald-100 { background: rgba(13,157,166,0.12) !important; }
+        .border-emerald-100 { border-color: rgba(13,157,166,0.15) !important; }
+        .text-emerald-700 { color: #2dd4cc !important; }
+        .text-emerald-600 { color: #2dd4cc !important; }
+
+        /* Blue/Purple/Yellow icon backgrounds */
+        .bg-blue-100   { background: rgba(59,130,246,0.12)  !important; }
+        .bg-purple-100 { background: rgba(139,92,246,0.12)  !important; }
+        .bg-yellow-100 { background: rgba(251,191,36,0.12)  !important; }
+        .bg-red-100    { background: rgba(239,68,68,0.12)   !important; }
+        .bg-teal-100   { background: rgba(20,184,166,0.12)  !important; }
+        .bg-pink-100   { background: rgba(236,72,153,0.12)  !important; }
+        .bg-indigo-100 { background: rgba(99,102,241,0.12)  !important; }
+
+        /* Antes vs Ahora dark */
+        .bg-red-50      { background: rgba(239,68,68,0.07)  !important; }
+        .border-red-100 { border-color: rgba(239,68,68,0.15) !important; }
+        .text-red-400   { color: #f87171 !important; }
+        .bg-amber-50    { background: rgba(251,191,36,0.07) !important; }
+        .border-amber-100 { border-color: rgba(251,191,36,0.15) !important; }
+        .text-amber-700 { color: #fbbf24 !important; }
+
+        /* Config status items */
+        .bg-emerald-600 { background: #0a8a93 !important; }
+
+        /* Metric card hover dark */
+        .metric-card:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.4) !important; }
+
+        /* ===== SCORE BADGES ===== */
+        .badge-score-alto   { background: rgba(13,157,166,0.15); color: #2dd4cc; border: 1px solid rgba(13,157,166,0.25); }
+        .badge-score-medio  { background: rgba(251,191,36,0.12);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.22); }
+        .badge-score-bajo   { background: rgba(239,68,68,0.10);   color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+
+        /* ===== ESTADO ATENDIDO ===== */
+        .badge-attended { background: rgba(99,102,241,0.12) !important; color: #a78bfa !important; }
+
+        /* ===== ESTADO BUTTONS ===== */
+        .estado-btn {
+            flex: 1; padding: 8px 4px; border-radius: 10px; border: 1px solid rgba(100,116,139,0.2);
+            font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+            background: transparent; color: #64748b;
+        }
+        .estado-btn:hover { border-color: rgba(100,116,139,0.4); color: #94a3b8; }
+        .estado-btn.active-pending   { background: rgba(251,191,36,0.12);  color: #fbbf24; border-color: rgba(251,191,36,0.3); }
+        .estado-btn.active-confirmed { background: rgba(13,157,166,0.12);  color: #2dd4cc; border-color: rgba(13,157,166,0.3); }
+        .estado-btn.active-attended  { background: rgba(99,102,241,0.12);  color: #a78bfa; border-color: rgba(99,102,241,0.3); }
+
+        /* ===== 360° DRAWER ===== */
+        #drawer-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            z-index: 9998 !important;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            display: none;
+        }
+        #drawer-overlay.open { opacity: 1; pointer-events: all; display: block; }
+
+        #drawer-panel {
+            position: fixed !important; top: 0 !important; right: 0 !important;
+            height: 100vh !important; width: 380px; max-width: 95vw;
+            background: #111c2e !important;
+            border-left: 1px solid rgba(100,116,139,0.25) !important;
+            z-index: 9999 !important;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.34,1.1,0.64,1);
+            overflow-y: auto; display: none; flex-direction: column;
+        }
+        #drawer-panel.open { transform: translateX(0) !important; display: flex !important; }
+
+        .drawer-section { border-bottom: 1px solid rgba(100,116,139,0.1); }
+
+        tbody tr.lead-row { cursor: pointer; }
+        tbody tr.lead-row:hover td { background: rgba(13,157,166,0.04); }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100">
+
+    <!-- Toast -->
+    <div id="toast" class="fixed top-5 right-5 z-50 hidden">
+        <div class="glass-card rounded-2xl shadow-2xl p-4 flex items-center gap-3 border border-green-100 w-80">
+            <div class="w-11 h-11 bg-green-100 rounded-full flex items-center justify-center text-xl flex-shrink-0">🔔</div>
+            <div class="flex-1">
+                <p class="font-semibold text-sm text-gray-800">Nuevo lead calificado</p>
+                <p id="toast-detalle" class="text-xs text-gray-500 mt-0.5">Ahora mismo</p>
+            </div>
+            <button onclick="closeToast()" class="text-gray-300 hover:text-gray-500 transition-colors text-lg leading-none">✕</button>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="w-60 gradient-sidebar flex flex-col flex-shrink-0">
+
+            <!-- Brand -->
+            <div class="p-5 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <svg width="40" height="40" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg" class="rounded-xl flex-shrink-0">
+                        <rect width="500" height="500" rx="90" fill="#1B75BC"/>
+                        <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#1B75BC"/>
+                        <text x="185" y="295" font-family="Arial Black, sans-serif" font-weight="900" font-size="230" fill="white">K</text>
+                    </svg>
+                    <div>
+                        <p class="text-white font-bold text-sm leading-tight">Kyrios Comunicación</p>
+                        <p class="text-teal-300 text-xs mt-0.5">Panel Demo Valentina</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Valentina status -->
+            <div class="px-4 py-2.5 border-b border-white/10">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-green-400 rounded-full pulse flex-shrink-0"></div>
+                    <span class="text-xs text-teal-300 font-medium">Valentina activa · 24/7</span>
+                </div>
+            </div>
+
+            <!-- Nav -->
+            <nav class="flex-1 p-3 space-y-0.5 mt-2">
+                <button onclick="showTab('dashboard')" id="nav-dashboard"
+                    class="nav-item active w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium text-teal-300">
+                    <span class="text-base">📊</span> Dashboard
+                </button>
+                <button onclick="showTab('leads')" id="nav-leads"
+                    class="nav-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium text-white/60">
+                    <span class="text-base">👥</span> Leads
+                    <span id="nav-leads-badge" class="ml-auto bg-green-500/25 text-teal-300 text-xs px-2 py-0.5 rounded-full font-semibold">0</span>
+                </button>
+                <button onclick="showTab('conversaciones')" id="nav-conversaciones"
+                    class="nav-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium text-white/60">
+                    <span class="text-base">💬</span> Conversaciones
+                </button>
+                <button onclick="showTab('accion')" id="nav-accion"
+                    class="nav-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium text-white/60">
+                    <span class="text-base">⚡</span> Valentina en acción
+                    <span class="ml-auto bg-yellow-500/25 text-yellow-300 text-xs px-2 py-0.5 rounded-full font-semibold">NEW</span>
+                </button>
+                <button onclick="showTab('config')" id="nav-config"
+                    class="nav-item w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium text-white/60">
+                    <span class="text-base">⚙️</span> Configuración
+                </button>
+            </nav>
+
+            <!-- Sidebar footer -->
+            <div class="p-4 border-t border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">K</div>
+                    <div>
+                        <p class="text-xs font-semibold text-white">Demo comercial</p>
+                        <p class="text-xs text-white/40">Kyrios Comunicación</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ===== MAIN ===== -->
+        <main class="flex-1 overflow-y-auto">
+
+            <!-- Top bar -->
+            <header class="bg-white border-b border-gray-100 px-6 py-3.5 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+                <div>
+                    <h1 id="page-title" class="text-base font-bold text-gray-800">Dashboard</h1>
+                    <p class="text-xs text-gray-400 mt-0.5">Lunes 21 de abril, 2026</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="bg-gray-100 rounded-xl px-3 py-2 flex items-center gap-2">
+                        <span class="text-sm text-gray-400">🔍</span>
+                        <input type="text" placeholder="Buscar..." class="bg-transparent text-sm outline-none w-36 text-gray-600 placeholder-gray-400">
+                    </div>
+                    <button class="relative p-2 rounded-xl hover:bg-gray-100 transition-colors">
+                        <span class="text-xl">🔔</span>
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- ===== TAB: DASHBOARD ===== -->
+            <div id="tab-dashboard" class="tab-content p-6 space-y-5">
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="metric-card glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Turnos hoy</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
+                                    <span class="counter" data-target="8">0</span>
+                                </p>
+                                <p class="text-xs text-emerald-600 mt-1.5 font-semibold flex items-center gap-1">
+                                    <span>↑</span> +3 vs ayer
+                                </p>
+                            </div>
+                            <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center text-xl">📅</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Leads semana</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
+                                    <span class="counter" data-target="47">0</span>
+                                </p>
+                                <p class="text-xs text-emerald-600 mt-1.5 font-semibold flex items-center gap-1">
+                                    <span>↑</span> +12 vs anterior
+                                </p>
+                            </div>
+                            <div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center text-xl">👥</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Conversión</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
+                                    <span class="counter" data-target="73">0</span>%
+                                </p>
+                                <p class="text-xs text-emerald-600 mt-1.5 font-semibold flex items-center gap-1">
+                                    <span>↑</span> +5% vs mes ant.
+                                </p>
+                            </div>
+                            <div class="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center text-xl">📈</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Respuesta</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-1.5">
+                                    0 <span class="text-base font-medium text-gray-400">min</span>
+                                </p>
+                                <p class="text-xs text-emerald-600 mt-1.5 font-semibold flex items-center gap-1">
+                                    ⚡ Instantáneo · 24hs
+                                </p>
+                            </div>
+                            <div class="w-11 h-11 bg-yellow-100 rounded-xl flex items-center justify-center text-xl">⚡</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="font-bold text-gray-800">Consultas por día</h3>
+                                <p class="text-xs text-gray-400 mt-0.5">Últimos 7 días</p>
+                            </div>
+                            <span class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full font-semibold border border-emerald-100">
+                                ↑ +18% esta semana
+                            </span>
+                        </div>
+                        <canvas id="lineChart" height="90"></canvas>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-gray-800">Qué quieren resolver</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">Este mes</p>
+                        </div>
+                        <canvas id="donutChart" height="150"></canvas>
+                        <div class="mt-4 space-y-2.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span><span class="text-gray-600">Turnos / reservas</span></div>
+                                <span class="font-bold text-gray-800">31%</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block"></span><span class="text-gray-600">Consultas</span></div>
+                                <span class="font-bold text-gray-800">24%</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block"></span><span class="text-gray-600">Pedidos</span></div>
+                                <span class="font-bold text-gray-800">18%</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block"></span><span class="text-gray-600">Presupuestos</span></div>
+                                <span class="font-bold text-gray-800">18%</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-gray-200 inline-block"></span><span class="text-gray-600">Otros</span></div>
+                                <span class="font-bold text-gray-800">17%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent activity -->
+                <div class="glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-gray-800">Actividad reciente</h3>
+                        <button onclick="showTab('leads')" class="text-xs text-emerald-600 font-semibold hover:underline">Ver todos →</button>
+                    </div>
+                    <div id="actividad-reciente" class="space-y-1">
+                        <p class="text-xs text-gray-400 p-3">Cargando actividad real...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAB: LEADS ===== -->
+            <div id="tab-leads" class="tab-content p-6 space-y-5 hidden">
+
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="glass-card rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
+                        <p id="stat-total" class="text-2xl font-extrabold text-gray-800">0</p>
+                        <p class="text-xs text-gray-400 mt-1 font-medium">Total</p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
+                        <p id="stat-confirmed" class="text-2xl font-extrabold text-emerald-600">0</p>
+                        <p class="text-xs text-gray-400 mt-1 font-medium">Confirmados</p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
+                        <p id="stat-pending" class="text-2xl font-extrabold text-yellow-600">0</p>
+                        <p class="text-xs text-gray-400 mt-1 font-medium">Pendientes</p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
+                        <p id="stat-attended" class="text-2xl font-extrabold" style="color:#a78bfa;">0</p>
+                        <p class="text-xs text-gray-400 mt-1 font-medium">Atendidos</p>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <div class="bg-gray-100 rounded-xl px-3 py-2 flex items-center gap-2">
+                                <span class="text-sm text-gray-400">🔍</span>
+                                <input id="search-leads" type="text" placeholder="Buscar..." class="bg-transparent text-sm outline-none w-32 text-gray-600" oninput="renderLeads()">
+                            </div>
+                            <select id="filter-estado" class="text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none text-gray-600 bg-white" onchange="renderLeads()">
+                                <option value="">Todos los estados</option>
+                                <option value="confirmed">Confirmados</option>
+                                <option value="pending">Pendientes</option>
+                                <option value="attended">Atendidos</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="cargarLeads(); cargarConversaciones();" class="bg-gray-100 text-gray-600 text-sm px-4 py-2 rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2 font-medium">
+                                🔄 Actualizar
+                            </button>
+                            <button class="bg-emerald-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-2 font-medium">
+                                ⬇ Exportar CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="text-left text-xs font-bold text-gray-400 uppercase px-4 py-3 tracking-wider">Prospecto</th>
+                                    <th class="text-left text-xs font-bold text-gray-400 uppercase px-4 py-3 tracking-wider">Necesidad</th>
+                                    <th class="text-left text-xs font-bold text-gray-400 uppercase px-4 py-3 tracking-wider">Negocio / Rubro</th>
+                                    <th class="text-left text-xs font-bold text-gray-400 uppercase px-4 py-3 tracking-wider">Horario</th>
+                                    <th class="text-left text-xs font-bold text-gray-400 uppercase px-4 py-3 tracking-wider">Score IA</th>
+                                    <th class="text-left text-xs font-bold text-gray-400 uppercase px-4 py-3 tracking-wider">Estado</th>
+                                    <th class="text-left text-xs font-bold text-gray-400 uppercase px-4 py-3 tracking-wider">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50" id="leads-table">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAB: CONVERSACIONES ===== -->
+            <div id="tab-conversaciones" class="tab-content p-6 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" style="height: calc(100vh - 140px);">
+
+                    <!-- Lista -->
+                    <div class="glass-card rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                        <div class="p-4 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 text-sm">Conversaciones recientes</h3>
+                        </div>
+                        <div class="flex-1 overflow-y-auto divide-y divide-gray-50" id="conv-list"></div>
+                    </div>
+
+                    <!-- Chat -->
+                    <div class="lg:col-span-2 glass-card rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden">
+                        <div class="p-4 border-b border-gray-100 flex items-center gap-3">
+                            <div id="chat-avatar" class="w-9 h-9 bg-emerald-100 rounded-full flex items-center justify-center text-xs font-bold text-emerald-700 flex-shrink-0">SR</div>
+                            <div>
+                                <p id="chat-name" class="text-sm font-bold text-gray-800">Sofía Ramos</p>
+                                <p id="chat-status" class="text-xs text-emerald-600 font-medium">Turno agendado ✅</p>
+                            </div>
+                        </div>
+                        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAB: VALENTINA EN ACCIÓN ===== -->
+            <div id="tab-accion" class="tab-content p-6 space-y-5 hidden">
+
+                <!-- Hero banner -->
+                <div class="rounded-2xl overflow-hidden relative" style="background: linear-gradient(135deg, #0f2a1e 0%, #1a5c45 50%, #2d7d67 100%);">
+                    <div class="p-7 relative z-10">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-2 h-2 bg-green-400 rounded-full pulse"></div>
+                            <span class="text-teal-300 text-xs font-semibold uppercase tracking-widest">Activa ahora mismo</span>
+                        </div>
+                        <h2 class="text-white text-2xl font-extrabold leading-tight">Valentina trabaja mientras<br>vos descansás.</h2>
+                        <p class="text-white/60 text-sm mt-2 max-w-lg">Atiende, califica y agenda turnos las 24 horas, los 7 días de la semana. Sin sueldos, sin ausencias, sin demoras.</p>
+                        <div class="flex gap-4 mt-5">
+                            <div class="bg-white/10 rounded-xl px-4 py-3 border border-white/15">
+                                <p class="text-white text-xl font-extrabold"><span class="counter2" data-target="247">0</span></p>
+                                <p class="text-white/50 text-xs mt-0.5">Consultas este mes</p>
+                            </div>
+                            <div class="bg-white/10 rounded-xl px-4 py-3 border border-white/15">
+                                <p class="text-white text-xl font-extrabold">0 min</p>
+                                <p class="text-white/50 text-xs mt-0.5">Tiempo de respuesta</p>
+                            </div>
+                            <div class="bg-white/10 rounded-xl px-4 py-3 border border-white/15">
+                                <p class="text-white text-xl font-extrabold"><span class="counter2" data-target="73">0</span>%</p>
+                                <p class="text-white/50 text-xs mt-0.5">Tasa de conversión</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute right-8 top-1/2 -translate-y-1/2 text-8xl opacity-10 select-none">🤖</div>
+                </div>
+
+                <!-- Antes vs Ahora -->
+                <div class="glass-card rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <h3 class="font-extrabold text-gray-800 text-lg mb-5">Antes vs Ahora</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-red-50 rounded-2xl p-5 border border-red-100">
+                            <p class="text-xs font-bold text-red-400 uppercase tracking-wider mb-4">😓 Sin Valentina</p>
+                            <div class="space-y-3">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-red-400 text-lg mt-0.5">✗</span>
+                                    <p class="text-sm text-gray-700">Respuesta promedio: <strong>47 minutos</strong></p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-red-400 text-lg mt-0.5">✗</span>
+                                    <p class="text-sm text-gray-700">Fuera de horario: <strong>0 respuestas</strong></p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-red-400 text-lg mt-0.5">✗</span>
+                                    <p class="text-sm text-gray-700">~3hs/día de tu equipo en WhatsApp</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-red-400 text-lg mt-0.5">✗</span>
+                                    <p class="text-sm text-gray-700">Leads perdidos por respuesta lenta</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-red-400 text-lg mt-0.5">✗</span>
+                                    <p class="text-sm text-gray-700">Sin registro automático de consultas</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-red-400 text-lg mt-0.5">✗</span>
+                                    <p class="text-sm text-gray-700">Calificación inconsistente por humanos</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-emerald-50 rounded-2xl p-5 border border-emerald-100">
+                            <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-4">🚀 Con Valentina</p>
+                            <div class="space-y-3">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-emerald-500 text-lg mt-0.5">✓</span>
+                                    <p class="text-sm text-gray-700">Respuesta: <strong>0 minutos · instantánea</strong></p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-emerald-500 text-lg mt-0.5">✓</span>
+                                    <p class="text-sm text-gray-700">Disponible <strong>24hs · 7 días</strong> la semana</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-emerald-500 text-lg mt-0.5">✓</span>
+                                    <p class="text-sm text-gray-700">Tu equipo recupera <strong>65hs/mes</strong></p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-emerald-500 text-lg mt-0.5">✓</span>
+                                    <p class="text-sm text-gray-700">0 leads perdidos fuera de horario</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-emerald-500 text-lg mt-0.5">✓</span>
+                                    <p class="text-sm text-gray-700">Cada consulta registrada automáticamente</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-emerald-500 text-lg mt-0.5">✓</span>
+                                    <p class="text-sm text-gray-700">Calificación médica consistente siempre</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Horarios + ROI -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+                    <div class="glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-gray-800">Horarios de consulta</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">El <span class="text-emerald-600 font-bold">41%</span> de los mensajes llega fuera del horario laboral</p>
+                        </div>
+                        <canvas id="hoursChart" height="130"></canvas>
+                        <div class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-100">
+                            <p class="text-xs text-amber-700 font-semibold">⚠️ Sin Valentina, esos leads se pierden.</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <h3 class="font-bold text-gray-800 mb-1">ROI estimado del mes</h3>
+                        <p class="text-xs text-gray-400 mb-4">Basado en turnos agendados por Valentina</p>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                <p class="text-sm text-gray-600">Turnos agendados este mes</p>
+                                <p class="font-bold text-gray-800">127</p>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                <p class="text-sm text-gray-600">Valor promedio por turno</p>
+                                <p class="font-bold text-gray-800">$4.500</p>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                                <p class="text-sm font-bold text-emerald-700">Ingresos generados por IA</p>
+                                <p class="font-extrabold text-emerald-700 text-lg">$571.500</p>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                <p class="text-sm text-gray-600">Costo mensual de Valentina</p>
+                                <p class="font-bold text-gray-800">$180 USD</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-emerald-600 rounded-xl text-center">
+                            <p class="text-white text-xs font-semibold">Retorno de inversión</p>
+                            <p class="text-white text-2xl font-extrabold mt-0.5">3.175x</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lo que hace Valentina -->
+                <div class="glass-card rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-5">Todo lo que hace Valentina por vos</h3>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
+                            <div class="text-3xl mb-2">💬</div>
+                            <p class="text-sm font-semibold text-gray-800">Atiende consultas</p>
+                            <p class="text-xs text-gray-400 mt-1">24hs · 7 días</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
+                            <div class="text-3xl mb-2">🎯</div>
+                            <p class="text-sm font-semibold text-gray-800">Califica prospectos</p>
+                            <p class="text-xs text-gray-400 mt-1">3 preguntas clave</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
+                            <div class="text-3xl mb-2">📅</div>
+                            <p class="text-sm font-semibold text-gray-800">Agenda turnos</p>
+                            <p class="text-xs text-gray-400 mt-1">Automáticamente</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
+                            <div class="text-3xl mb-2">📊</div>
+                            <p class="text-sm font-semibold text-gray-800">Registra leads</p>
+                            <p class="text-xs text-gray-400 mt-1">En tiempo real</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
+                            <div class="text-3xl mb-2">🛡️</div>
+                            <p class="text-sm font-semibold text-gray-800">Detecta contraindicaciones</p>
+                            <p class="text-xs text-gray-400 mt-1">Protege al negocio</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
+                            <div class="text-3xl mb-2">🗣️</div>
+                            <p class="text-sm font-semibold text-gray-800">Habla como vos</p>
+                            <p class="text-xs text-gray-400 mt-1">Tono de la marca</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
+                            <div class="text-3xl mb-2">📍</div>
+                            <p class="text-sm font-semibold text-gray-800">Cualquier rubro</p>
+                            <p class="text-xs text-gray-400 mt-1">Se adapta a tu negocio</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 text-center hover:bg-emerald-50 transition-colors">
+                            <div class="text-3xl mb-2">⚡</div>
+                            <p class="text-sm font-semibold text-gray-800">Escala ilimitado</p>
+                            <p class="text-xs text-gray-400 mt-1">100 chats a la vez</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== TAB: CONFIG ===== -->
+            <div id="tab-config" class="tab-content p-6 space-y-5 hidden">
+
+                <div class="glass-card rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-5">Información del negocio</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold block mb-1.5">Nombre del negocio</label>
+                            <input placeholder="Varía por prospecto — demo multi-rubro" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-400 transition-colors">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold block mb-1.5">Ciudad</label>
+                            <input placeholder="Varía por prospecto" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-400 transition-colors">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold block mb-1.5">Nombre del agente IA</label>
+                            <input value="Valentina" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-400 transition-colors">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 font-semibold block mb-1.5">WhatsApp</label>
+                            <input value="+54 9 380 433-4982" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-400 transition-colors">
+                        </div>
+                    </div>
+                    <button class="mt-5 bg-emerald-600 text-white text-sm px-5 py-2.5 rounded-xl hover:bg-emerald-700 transition-colors font-medium">
+                        Guardar cambios
+                    </button>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-5">Estado del sistema</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-emerald-500 rounded-full pulse"></div>
+                                <span class="text-sm font-medium text-gray-700">Valentina (Agente IA)</span>
+                            </div>
+                            <span class="text-xs text-emerald-700 font-bold bg-emerald-100 px-3 py-1 rounded-full">Activo · 24/7</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-emerald-500 rounded-full pulse"></div>
+                                <span class="text-sm font-medium text-gray-700">WhatsApp Business</span>
+                            </div>
+                            <span class="text-xs text-emerald-700 font-bold bg-emerald-100 px-3 py-1 rounded-full">Conectado</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-emerald-500 rounded-full pulse"></div>
+                                <span class="text-sm font-medium text-gray-700">Base de datos</span>
+                            </div>
+                            <span class="text-xs text-emerald-700 font-bold bg-emerald-100 px-3 py-1 rounded-full">Sincronizado</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-emerald-500 rounded-full pulse"></div>
+                                <span class="text-sm font-medium text-gray-700">Servidor en la nube</span>
+                            </div>
+                            <span class="text-xs text-emerald-700 font-bold bg-emerald-100 px-3 py-1 rounded-full">Online</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ===== 360° DRAWER OVERLAY ===== -->
+    <div id="drawer-overlay" onclick="closeDrawer()"></div>
+
+    <!-- ===== 360° DRAWER PANEL ===== -->
+    <div id="drawer-panel">
+        <!-- Header del drawer -->
+        <div class="drawer-section p-5 flex items-start justify-between gap-3">
+            <div class="flex items-center gap-4">
+                <div id="d-avatar" class="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-extrabold text-white flex-shrink-0" style="background: linear-gradient(135deg,#0a8a93,#0d9488);"></div>
+                <div>
+                    <p id="d-name" class="font-bold text-white text-lg leading-tight"></p>
+                    <p id="d-phone" class="text-xs mt-0.5" style="color:#64748b;"></p>
+                    <div class="flex items-center gap-2 mt-1.5">
+                        <span id="d-score-badge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold"></span>
+                        <span id="d-estado-badge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold"></span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="closeDrawer()" class="text-slate-500 hover:text-white transition-colors text-xl mt-1">✕</button>
+        </div>
+
+        <!-- Cambiar estado -->
+        <div class="drawer-section p-5">
+            <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color:#475569;">Estado del lead</p>
+            <div style="display:flex; gap:8px;">
+                <button class="estado-btn" id="btn-pending"   onclick="cambiarEstado('pending')">⏳ Pendiente</button>
+                <button class="estado-btn" id="btn-confirmed" onclick="cambiarEstado('confirmed')">✅ Confirmado</button>
+                <button class="estado-btn" id="btn-attended"  onclick="cambiarEstado('attended')">🏁 Atendido</button>
+            </div>
+        </div>
+
+        <!-- Datos del turno -->
+        <div class="drawer-section p-5 space-y-3">
+            <p class="text-xs font-bold uppercase tracking-wider" style="color:#475569;">Turno agendado</p>
+            <div class="grid grid-cols-2 gap-3">
+                <div style="background:#1e293b;" class="rounded-xl p-3">
+                    <p class="text-xs mb-1" style="color:#64748b;">Necesidad</p>
+                    <p id="d-tratamiento" class="text-sm font-semibold text-white"></p>
+                </div>
+                <div style="background:#1e293b;" class="rounded-xl p-3">
+                    <p class="text-xs mb-1" style="color:#64748b;">Negocio / Rubro</p>
+                    <p id="d-sucursal" class="text-sm font-semibold text-white"></p>
+                </div>
+                <div style="background:#1e293b;" class="rounded-xl p-3">
+                    <p class="text-xs mb-1" style="color:#64748b;">Horario preferido</p>
+                    <p id="d-horario" class="text-sm font-semibold text-white"></p>
+                </div>
+                <div style="background:#1e293b;" class="rounded-xl p-3">
+                    <p class="text-xs mb-1" style="color:#64748b;">Contacto</p>
+                    <p id="d-fecha" class="text-sm font-semibold text-white"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score IA explicado -->
+        <div class="drawer-section p-5">
+            <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color:#475569;">Análisis IA</p>
+            <div style="background:#1e293b;" class="rounded-xl p-4 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs" style="color:#94a3b8;">Probabilidad de conversión</span>
+                    <span id="d-prob" class="text-sm font-bold text-white"></span>
+                </div>
+                <div class="w-full rounded-full h-1.5" style="background:#0f172a;">
+                    <div id="d-prob-bar" class="h-1.5 rounded-full transition-all duration-700" style="background:linear-gradient(90deg,#0a8a93,#0d9da6);"></div>
+                </div>
+                <p id="d-score-reason" class="text-xs pt-1" style="color:#64748b;"></p>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="drawer-section p-5">
+            <p class="text-xs font-bold uppercase tracking-wider mb-3" style="color:#475569;">Historial de interacción</p>
+            <div id="d-timeline" class="space-y-3"></div>
+        </div>
+
+        <!-- Notas -->
+        <div class="p-5">
+            <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:#475569;">Notas internas</p>
+            <textarea id="d-notas" rows="3" placeholder="Agregar nota sobre este contacto..."
+                class="w-full rounded-xl text-sm p-3 resize-none outline-none transition-colors"
+                style="background:#1e293b; color:#e2e8f0; border:1px solid rgba(100,116,139,0.2);"
+                onfocus="this.style.borderColor='rgba(13,157,166,0.4)'"
+                onblur="this.style.borderColor='rgba(100,116,139,0.2)'"></textarea>
+            <button class="mt-2 w-full bg-emerald-700 hover:bg-emerald-600 text-white text-sm py-2 rounded-xl font-medium transition-colors">
+                Guardar nota
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer style="background:#0d1829; border-top:1px solid rgba(100,116,139,0.15);" class="py-5 px-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+
+            <!-- Logo Kyrios SVG -->
+            <div class="flex items-center gap-3">
+                <svg width="38" height="38" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="500" height="500" rx="90" fill="#1B75BC"/>
+                    <path d="M155 130 L155 280 L230 200 L320 280 L320 130" stroke="white" stroke-width="0" fill="none"/>
+                    <!-- Speech bubble tail -->
+                    <path d="M90 80 C90 50 115 30 145 30 L355 30 C385 30 410 50 410 80 L410 310 C410 340 385 360 355 360 L230 360 L170 430 L170 360 L145 360 C115 360 90 340 90 310 Z" fill="#1B75BC"/>
+                    <!-- K letter -->
+                    <text x="185" y="295" font-family="Arial Black, sans-serif" font-weight="900" font-size="230" fill="white">K</text>
+                </svg>
+                <div class="leading-tight">
+                    <p class="font-extrabold text-white tracking-widest text-sm uppercase">KYRIOS</p>
+                    <p class="text-xs tracking-[0.25em] uppercase" style="color:#94a3b8;">Comunicación</p>
+                </div>
+            </div>
+
+            <!-- Texto -->
+            <p class="text-xs text-center" style="color:#64748b;">
+                Desarrollado por <span class="text-slate-400 font-semibold">Kyrios Comunicación</span> &nbsp;·&nbsp; Todos los derechos reservados &copy; 2026
+            </p>
+
+        </div>
+    </footer>
+
+    <script>
+        // ===== DATA (en vivo, vía API) =====
+        const API_BASE  = "https://web-production-b0244.up.railway.app";
+        const API_TOKEN = "fmnh51zrQA8NZvNZYT863Ky5Av6xosiyqzQDwzpsqoA";
+
+
+        let leadsData = [];
+        let conversations = [];
+        let indexConvActivo = 0;
+
+        async function cargarLeads() {
+            try {
+                const res = await fetch(`${API_BASE}/api/leads?token=${API_TOKEN}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                leadsData = data.leads || [];
+                renderLeads();
+                renderActividadReciente();
+                const badge = document.getElementById('nav-leads-badge');
+                if (badge) badge.textContent = leadsData.length;
+            } catch (e) {
+                console.error("[Dashboard] Error cargando leads:", e);
+            }
+        }
+
+        async function cargarConversaciones() {
+            try {
+                const res = await fetch(`${API_BASE}/api/conversaciones?token=${API_TOKEN}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                conversations = data.conversaciones || [];
+                renderConvList();
+                if (conversations.length) {
+                    selectConv(Math.min(indexConvActivo, conversations.length - 1));
+                }
+            } catch (e) {
+                console.error("[Dashboard] Error cargando conversaciones:", e);
+            }
+        }
+
+
+        // ===== ESTADO LABELS =====
+        function estadoLabel(e) {
+            if (e === 'confirmed') return 'Confirmado';
+            if (e === 'attended')  return 'Atendido';
+            return 'Pendiente';
+        }
+        function estadoBadgeClass(e) {
+            if (e === 'confirmed') return 'badge-confirmed';
+            if (e === 'attended')  return 'badge-attended';
+            return 'badge-pending';
+        }
+
+        // ===== RENDERS =====
+        function renderActividadReciente() {
+            const container = document.getElementById('actividad-reciente');
+            if (!container) return;
+            if (!leadsData.length) {
+                container.innerHTML = '<p class="text-xs text-gray-400 p-3">Todavía no hay prospectos registrados.</p>';
+                return;
+            }
+            container.innerHTML = leadsData.slice(0, 4).map(l => `
+                <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div class="w-9 h-9 bg-${l.color}-100 rounded-full flex items-center justify-center text-xs font-bold text-${l.color}-700 flex-shrink-0">${l.initials}</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-800">${l.nombre}</p>
+                        <p class="text-xs text-gray-400">${l.necesidad} · ${l.fecha}</p>
+                    </div>
+                    <span class="badge-pending text-xs px-3 py-1 rounded-full font-semibold flex-shrink-0">Pendiente</span>
+                </div>
+            `).join('');
+        }
+
+        function renderLeads() {
+            const search  = (document.getElementById('search-leads')?.value || '').toLowerCase();
+            const filter  = document.getElementById('filter-estado')?.value || '';
+
+            const filtered = leadsData.filter((l, i) => {
+                const matchSearch = !search || l.nombre.toLowerCase().includes(search) || l.necesidad.toLowerCase().includes(search);
+                const matchFilter = !filter || l.estado === filter;
+                return matchSearch && matchFilter;
+            });
+
+            const tbody = document.getElementById('leads-table');
+            tbody.innerHTML = filtered.map((l) => {
+                const i = leadsData.indexOf(l);
+                const score = l.score;
+                return `
+                <tr class="lead-row hover:bg-gray-50 transition-colors" onclick="openDrawer(${i})">
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-${l.color}-100 rounded-full flex items-center justify-center text-xs font-bold text-${l.color}-700">${l.initials}</div>
+                            <span class="text-sm font-semibold text-gray-800">${l.nombre}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${l.necesidad}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${l.rubro}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">${l.horario}</td>
+                    <td class="px-4 py-3">
+                        <span class="${score.css} text-xs px-2.5 py-1 rounded-full font-semibold">● ${score.nivel}</span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="${estadoBadgeClass(l.estado)} text-xs px-3 py-1 rounded-full font-semibold">
+                            ${estadoLabel(l.estado)}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-gray-400">${l.fecha}</td>
+                </tr>`;
+            }).join('');
+
+            // Stats dinámicas
+            document.getElementById('stat-total').textContent     = leadsData.length;
+            document.getElementById('stat-confirmed').textContent = leadsData.filter(l => l.estado === 'confirmed').length;
+            document.getElementById('stat-pending').textContent   = leadsData.filter(l => l.estado === 'pending').length;
+            document.getElementById('stat-attended').textContent  = leadsData.filter(l => l.estado === 'attended').length;
+        }
+
+        function renderConvList() {
+            const container = document.getElementById('conv-list');
+            container.innerHTML = conversations.map((c, i) => `
+                <div onclick="selectConv(${i})" id="conv-item-${i}"
+                    class="p-4 hover:bg-gray-50 cursor-pointer transition-colors ${i === 0 ? 'bg-emerald-50 border-l-4 border-emerald-500' : ''}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-${c.color}-100 rounded-full flex items-center justify-center text-xs font-bold text-${c.color}-700 flex-shrink-0">${c.initials}</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-gray-800">${c.nombre}</p>
+                            <p class="text-xs text-gray-400 truncate">${c.status}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderMessages(index) {
+            const conv = conversations[index];
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '';
+            conv.messages.forEach((msg, i) => {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.className = `flex ${msg.from === 'user' ? 'justify-end' : 'justify-start'}`;
+                    div.innerHTML = `
+                        <div class="max-w-xs lg:max-w-sm">
+                            ${msg.from === 'bot' ? '<p class="text-xs text-gray-400 mb-1 ml-1 font-medium">Valentina ✨</p>' : ''}
+                            <div class="${msg.from === 'bot' ? 'bubble-valentina' : 'bubble-user'} px-4 py-2.5 text-sm text-gray-800 shadow-sm leading-relaxed">
+                                ${msg.text}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                    container.scrollTop = container.scrollHeight;
+                }, i * 60);
+            });
+        }
+
+        function selectConv(index) {
+            indexConvActivo = index;
+            conversations.forEach((_, i) => {
+                const el = document.getElementById(`conv-item-${i}`);
+                el.classList.remove('bg-emerald-50', 'border-l-4', 'border-emerald-500');
+            });
+            document.getElementById(`conv-item-${index}`).classList.add('bg-emerald-50', 'border-l-4', 'border-emerald-500');
+            const conv = conversations[index];
+            document.getElementById('chat-avatar').textContent = conv.initials;
+            document.getElementById('chat-name').textContent = conv.nombre;
+            document.getElementById('chat-status').textContent = conv.status;
+            renderMessages(index);
+        }
+
+        // ===== 360° DRAWER =====
+        function openDrawer(index) {
+            currentDrawerIndex = index;
+            const l = leadsData[index];
+            const score = l.score;
+            updateEstadoButtons(l.estado);
+
+            // Avatar
+            document.getElementById('d-avatar').textContent = l.initials;
+            document.getElementById('d-name').textContent = l.nombre;
+            document.getElementById('d-phone').textContent = l.telefono;
+
+            // Score badge
+            const sb = document.getElementById('d-score-badge');
+            sb.className = `text-xs px-2.5 py-0.5 rounded-full font-semibold ${score.css}`;
+            sb.textContent = '● Score ' + score.nivel;
+
+            // Estado badge
+            const eb = document.getElementById('d-estado-badge');
+            eb.className = `text-xs px-2.5 py-0.5 rounded-full font-semibold ${l.estado === 'confirmed' ? 'badge-confirmed' : 'badge-pending'}`;
+            eb.textContent = l.estado === 'confirmed' ? 'Confirmado' : 'Pendiente';
+
+            // Turno
+            document.getElementById('d-tratamiento').textContent = l.necesidad;
+            document.getElementById('d-sucursal').textContent = l.rubro;
+            document.getElementById('d-horario').textContent = l.horario;
+            document.getElementById('d-fecha').textContent = l.fecha;
+
+            // Score bar
+            document.getElementById('d-prob').textContent = score.pct + '%';
+            document.getElementById('d-prob-bar').style.width = score.pct + '%';
+            const barColors = { Alto: 'linear-gradient(90deg,#0a8a93,#0d9da6)', Medio: 'linear-gradient(90deg,#d97706,#fbbf24)', Bajo: 'linear-gradient(90deg,#dc2626,#f87171)' };
+            document.getElementById('d-prob-bar').style.background = barColors[score.nivel];
+            document.getElementById('d-score-reason').textContent = score.razon;
+
+            // Timeline
+            const timeline = document.getElementById('d-timeline');
+            const events = [
+                { icon: '💬', text: `Primera consulta por WhatsApp`, time: l.fecha },
+                { icon: '🤖', text: `Valentina completó calificación (3 preguntas)`, time: l.fecha },
+                { icon: l.estado === 'confirmed' ? '✅' : '⏳', text: l.estado === 'confirmed' ? `Turno agendado — ${l.rubro}` : 'Esperando confirmación de turno', time: l.estado === 'confirmed' ? l.fecha : 'Pendiente' },
+            ];
+            timeline.innerHTML = events.map(e => `
+                <div class="flex items-start gap-3">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center text-sm flex-shrink-0" style="background:#1e293b;">${e.icon}</div>
+                    <div>
+                        <p class="text-xs text-white font-medium">${e.text}</p>
+                        <p class="text-xs mt-0.5" style="color:#475569;">${e.time}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            // Notas
+            document.getElementById('d-notas').value = l.notas || '';
+
+            // Open
+            const overlay = document.getElementById('drawer-overlay');
+            const panel   = document.getElementById('drawer-panel');
+            overlay.style.display = 'block';
+            panel.style.display   = 'flex';
+            // forzar reflow antes de la transición
+            panel.getBoundingClientRect();
+            overlay.classList.add('open');
+            panel.classList.add('open');
+        }
+
+        let currentDrawerIndex = null;
+
+        function updateEstadoButtons(estado) {
+            ['pending','confirmed','attended'].forEach(e => {
+                const btn = document.getElementById('btn-' + e);
+                btn.className = 'estado-btn' + (estado === e ? ' active-' + e : '');
+            });
+        }
+
+        function cambiarEstado(nuevoEstado) {
+            if (currentDrawerIndex === null) return;
+            leadsData[currentDrawerIndex].estado = nuevoEstado;
+            updateEstadoButtons(nuevoEstado);
+
+            // Actualizar badge en el header del drawer
+            const eb = document.getElementById('d-estado-badge');
+            eb.className = `text-xs px-2.5 py-0.5 rounded-full font-semibold ${estadoBadgeClass(nuevoEstado)}`;
+            eb.textContent = estadoLabel(nuevoEstado);
+
+            // Re-render tabla y stats
+            renderLeads();
+
+            // Toast de confirmación
+            const toastEl = document.getElementById('toast');
+            toastEl.classList.remove('hidden');
+            toastEl.querySelector('p').textContent = `Estado actualizado: ${estadoLabel(nuevoEstado)}`;
+            toastEl.classList.add('toast-enter');
+            setTimeout(() => { toastEl.classList.add('hidden'); toastEl.classList.remove('toast-enter'); }, 2500);
+        }
+
+        function closeDrawer() {
+            const overlay = document.getElementById('drawer-overlay');
+            const panel   = document.getElementById('drawer-panel');
+            overlay.classList.remove('open');
+            panel.classList.remove('open');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                panel.style.display   = 'none';
+            }, 360);
+        }
+
+        // ===== TABS =====
+        const tabs = ['dashboard', 'leads', 'conversaciones', 'accion', 'config'];
+        const titles = { dashboard: 'Dashboard', leads: 'Gestión de Leads', conversaciones: 'Conversaciones', accion: 'Valentina en Acción', config: 'Configuración' };
+
+        function animateCounters2() {
+            document.querySelectorAll('.counter2').forEach(el => {
+                const target = parseInt(el.dataset.target);
+                const steps = 60;
+                const step = target / steps;
+                let current = 0, count = 0;
+                const timer = setInterval(() => {
+                    count++;
+                    current = Math.min(current + step, target);
+                    el.textContent = Math.floor(current);
+                    if (count >= steps) clearInterval(timer);
+                }, 1800 / steps);
+            });
+        }
+
+        function showTab(tab) {
+            tabs.forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const nav = document.getElementById(`nav-${t}`);
+                nav.classList.remove('active', 'text-teal-300');
+                nav.classList.add('text-white/60');
+            });
+            const el = document.getElementById(`tab-${tab}`);
+            el.classList.remove('hidden');
+            el.style.animation = 'none';
+            el.offsetHeight;
+            el.style.animation = '';
+            document.getElementById(`nav-${tab}`).classList.add('active', 'text-teal-300');
+            document.getElementById(`nav-${tab}`).classList.remove('text-white/60');
+            document.getElementById('page-title').textContent = titles[tab];
+            if (tab === 'conversaciones') renderMessages(0);
+            if (tab === 'accion') { animateCounters2(); initCharts(); }
+        }
+
+        // ===== COUNTERS =====
+        function animateCounter(el) {
+            const target = parseInt(el.dataset.target);
+            const duration = 1800;
+            const steps = 60;
+            const step = target / steps;
+            let current = 0, count = 0;
+            const timer = setInterval(() => {
+                count++;
+                current = Math.min(current + step, target);
+                el.textContent = Math.floor(current);
+                if (count >= steps) clearInterval(timer);
+            }, duration / steps);
+        }
+
+        // ===== CHARTS =====
+        function initCharts() {
+            new Chart(document.getElementById('lineChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                    datasets: [{
+                        label: 'Consultas',
+                        data: [23, 31, 28, 45, 38, 52, 47],
+                        borderColor: '#0d9da6',
+                        backgroundColor: 'rgba(13,157,166,0.07)',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#0d9da6',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        tension: 0.4,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', padding: 10, cornerRadius: 10 } },
+                    scales: {
+                        y: { beginAtZero: false, min: 10, grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: { size: 11 } } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } }
+                    },
+                    animation: { duration: 1800, easing: 'easeInOutQuart' }
+                }
+            });
+
+            // Hours chart
+            if (document.getElementById('hoursChart')) {
+                new Chart(document.getElementById('hoursChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['8hs','10hs','12hs','14hs','16hs','18hs','20hs','22hs','0hs','2hs'],
+                        datasets: [{
+                            label: 'Consultas',
+                            data: [12, 28, 22, 35, 31, 24, 38, 29, 14, 8],
+                            backgroundColor: (ctx) => {
+                                const idx = ctx.dataIndex;
+                                // Fuera de horario laboral (20hs en adelante y madrugada)
+                                return idx >= 6 ? '#f59e0b' : '#0d9da6';
+                            },
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { backgroundColor: '#1e293b', padding: 10, cornerRadius: 10 }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                        },
+                        animation: { duration: 1800, easing: 'easeInOutQuart' }
+                    }
+                });
+            }
+
+            new Chart(document.getElementById('donutChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Turnos / reservas', 'Consultas', 'Pedidos', 'Presupuestos', 'Otros'],
+                    datasets: [{
+                        data: [28, 22, 18, 15, 17],
+                        backgroundColor: ['#0d9da6', '#60a5fa', '#a78bfa', '#fbbf24', '#e2e8f0'],
+                        borderWidth: 0,
+                        hoverOffset: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '72%',
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', padding: 10, cornerRadius: 10 } },
+                    animation: { duration: 1800, easing: 'easeInOutQuart' }
+                }
+            });
+        }
+
+        // ===== TOAST =====
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            toast.querySelector('div').classList.remove('toast-exit');
+            toast.querySelector('div').classList.add('toast-enter');
+        }
+        function closeToast() {
+            const inner = document.getElementById('toast').querySelector('div');
+            inner.classList.remove('toast-enter');
+            inner.classList.add('toast-exit');
+            setTimeout(() => document.getElementById('toast').classList.add('hidden'), 400);
+        }
+
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarLeads();
+            cargarConversaciones();
+            setInterval(cargarLeads, 15000);
+            setInterval(cargarConversaciones, 15000);
+            document.querySelectorAll('.counter').forEach(animateCounter);
+            initCharts();
+        });
+    </script>
+</body>
+</html>
