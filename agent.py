@@ -28,7 +28,7 @@ Esto es distinto a la regla anterior — es sobre lo que cuesta CONTRATAR un age
 Recién cuando pregunten el precio, tu PRIMERA respuesta a esa pregunta puntual SIEMPRE tiene que incluir "desde USD 250/mes" de forma explícita, en la primera o segunda oración. Podés agregar que el número final depende del volumen y las integraciones, y que la propuesta concreta la arma el equipo en la llamada.
 
 ## SALIDA RÁPIDA — CUANDO EL PROSPECTO QUIERE SALTAR LA DEMO (prioridad sobre el flujo de abajo)
-Si en cualquier momento el prospecto dice explícitamente que ya está convencido y quiere pasar directo a una propuesta, que quiere hablar con una persona o con el equipo, o pide saltar la demo — NO insistas con el guion ni lo hagas pasar por las etapas que faltan. Reconocé el pedido (ej: "Dale, sin problema — justo para eso necesito 2 datos tuyos así te contacta el equipo directo") y andá directo a pedirle nombre completo y el mejor horario para la llamada (lo mismo que pide la ETAPA 4), sin forzar el diagnóstico, la demo de consulta ni la calificación. Si ya te había dicho en la ETAPA 0 qué quería resolver y de qué rubro es, usalo igual para el cierre de la ETAPA 5; si no te lo dijo, pedíselo junto con el nombre y el horario antes de cerrar.
+Si en cualquier momento el prospecto dice explícitamente que ya está convencido y quiere pasar directo a una propuesta, que quiere hablar con una persona o con el equipo, o pide saltar la demo — NO insistas con el guion ni lo hagas pasar por las etapas que faltan. Reconocé el pedido avisándole que le vas a pasar un resumen de la charla a Ariel para que se comunique a la brevedad — por ejemplo: "Dale, sin problema — le voy a pasar a Ariel un resumen de lo que hablamos y se va a estar comunicando con vos a la brevedad. Para eso, pasame tu nombre completo y el mejor horario para que te llame." Andá directo a pedirle nombre completo y el mejor horario para la llamada (lo mismo que pide la ETAPA 4), sin forzar el diagnóstico, la demo de consulta ni la calificación. Si ya te había dicho en la ETAPA 0 qué quería resolver y de qué rubro es, usalo igual para el cierre de la ETAPA 5; si no te lo dijo, pedíselo junto con el nombre y el horario antes de cerrar.
 
 Esto NO aplica a una pregunta genérica tipo "¿cómo funciona?" al principio de la charla — ahí seguís con la ETAPA 0 normal. Es específicamente para cuando el prospecto pide explícitamente saltar el proceso o hablar con alguien.
 
@@ -77,6 +77,15 @@ Ejemplo (el prospecto dijo en la Etapa 0 "Mi negocio es Pizzería Don Mario, qui
 
 IMPORTANTE: Reemplazá SIEMPRE los campos con los datos reales que te dio el prospecto. Nunca escribas los corchetes.
 """
+
+
+def _build_transcript(messages: list) -> str:
+    """Texto legible de la charla hasta ahora, para darle contexto a Ariel en la notificación."""
+    lineas = []
+    for m in messages:
+        quien = "Prospecto" if m["role"] == "user" else "Valentina"
+        lineas.append(f"{quien}: {m['content']}")
+    return "\n".join(lineas)
 
 
 @dataclass
@@ -134,7 +143,7 @@ class OftalmologiaAgent:
             print(f"[Sheets] Lead pendiente registrado: {data['nombre']}")
             conv.ultimo_lead_registrado = data
             conv.pending_lead = None
-            notify_lead(**data)
+            notify_lead(**data, resumen=_build_transcript(conv.messages))
         else:
             print(f"[Sheets] ⚠️ Reintento fallido para {phone_number}, se intentará de nuevo")
 
@@ -202,7 +211,7 @@ class OftalmologiaAgent:
             if conv:
                 conv.ultimo_lead_registrado = lead_data
                 conv.pending_lead = None
-            notify_lead(**lead_data)
+            notify_lead(**lead_data, resumen=_build_transcript(conv.messages) if conv else "")
         else:
             print(f"[Sheets] ⚠️ Fallo al registrar lead para {phone_number}. Guardado para reintento.")
             if conv:
