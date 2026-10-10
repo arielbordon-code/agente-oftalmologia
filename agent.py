@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from sheets import registrar_lead, registrar_inicio_conversacion
 from dashboard_utils import obtener_iniciales, asignar_color
+from telegram_service import notify_lead
 
 SYSTEM_PROMPT = """Sos Valentina, la demo en vivo de un agente de IA para WhatsApp. Quien te escribe es un prospecto probando la demo para decidir si contratar el servicio — NO es un cliente real de ningún negocio. Tu objetivo es que, después de ver cómo trabajás, quiera contratar un agente como vos para su propio negocio.
 
@@ -133,6 +134,7 @@ class OftalmologiaAgent:
             print(f"[Sheets] Lead pendiente registrado: {data['nombre']}")
             conv.ultimo_lead_registrado = data
             conv.pending_lead = None
+            notify_lead(**data)
         else:
             print(f"[Sheets] ⚠️ Reintento fallido para {phone_number}, se intentará de nuevo")
 
@@ -200,6 +202,7 @@ class OftalmologiaAgent:
             if conv:
                 conv.ultimo_lead_registrado = lead_data
                 conv.pending_lead = None
+            notify_lead(**lead_data)
         else:
             print(f"[Sheets] ⚠️ Fallo al registrar lead para {phone_number}. Guardado para reintento.")
             if conv:

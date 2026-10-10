@@ -1,0 +1,38 @@
+"""Aviso instantáneo por Telegram cuando Valentina captura un lead —
+para poder sumarse a la conversación en persona mientras sigue en curso,
+sobre todo cuando el prospecto pidió explícitamente hablar con alguien."""
+
+import os
+import httpx
+
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+
+def _send(text: str) -> bool:
+    if not BOT_TOKEN or not CHAT_ID:
+        return False
+    try:
+        resp = httpx.post(
+            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+            json={"chat_id": CHAT_ID, "text": text, "parse_mode": "Markdown"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        return True
+    except Exception as e:
+        print(f"[telegram] Error al notificar: {e}")
+        return False
+
+
+def notify_lead(telefono: str, nombre: str, tratamiento: str, sucursal: str = "", horario: str = "") -> bool:
+    text = (
+        f"🎯 *Nuevo lead — Demo Valentina*\n\n"
+        f"👤 {nombre}\n"
+        f"📞 {telefono}\n"
+        f"🏢 {sucursal or 'No especificado'}\n"
+        f"💼 {tratamiento}\n"
+        f"🕐 Horario para la llamada: {horario or 'No especificado'}\n\n"
+        f"Podés sumarte directo a la conversación de WhatsApp si querés atenderlo vos mismo."
+    )
+    return _send(text)
