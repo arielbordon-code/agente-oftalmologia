@@ -12,13 +12,24 @@ Para conectar con Twilio:
 
 import os
 from collections import deque
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.request_validator import RequestValidator
 from dotenv import load_dotenv
 from agent import OftalmologiaAgent as EsteticaAgent
-from sheets import listar_leads, actualizar_estado, actualizar_notas, ESTADO_A_TEXTO, obtener_estadisticas
+from sheets import (
+    listar_leads,
+    actualizar_estado,
+    actualizar_notas,
+    ESTADO_A_TEXTO,
+    obtener_estadisticas,
+    obtener_leads_para_seguimiento,
+    marcar_seguimiento_enviado,
+)
+from whatsapp_followup import send_followup_whatsapp
 
 load_dotenv()
 
@@ -27,6 +38,19 @@ app = Flask(__name__)
 agent = EsteticaAgent(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+
+
+def _run_followups():
+    leads = obtener_leads_para_seguimiento(dias=3)
+    for lead in leads:
+        ok = send_followup_whatsapp(lead["telefono"])
+        if ok:
+            marcar_seguimiento_enviado(lead["fila"])
+
+
+scheduler = BackgroundScheduler(timezone="America/Argentina/Buenos_Aires")
+scheduler.add_job(_run_followups, CronTrigger(hour=10, minute=30))
+scheduler.start()
 
 DASHBOARD_API_TOKEN = os.getenv("DASHBOARD_API_TOKEN", "")
 DASHBOARD_ORIGINS = [o.strip() for o in os.getenv("DASHBOARD_ORIGINS", "").split(",") if o.strip()]

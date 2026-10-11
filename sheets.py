@@ -30,6 +30,7 @@ HEADERS = [
     "Score IA",
     "Estado",
     "Notas",
+    "Seguimiento enviado",
 ]
 
 ESTADO_A_TEXTO = {
@@ -81,16 +82,16 @@ def setup_formato():
 
     sheet.update_title("Leads WhatsApp")
 
-    sheet.update("A1:I1", [["Kyrios — Prospectos Demo Valentina"] + [""] * 8])
-    sheet.merge_cells("A1:I1")
-    format_cell_range(sheet, "A1:I1", CellFormat(
+    sheet.update("A1:J1", [["Kyrios — Prospectos Demo Valentina"] + [""] * 9])
+    sheet.merge_cells("A1:J1")
+    format_cell_range(sheet, "A1:J1", CellFormat(
         backgroundColor=COLOR_TITULO,
         textFormat=TextFormat(bold=True, fontSize=14, foregroundColor=COLOR_BLANCO),
         horizontalAlignment="CENTER",
     ))
 
-    sheet.update("A2:I2", [HEADERS])
-    format_cell_range(sheet, "A2:I2", CellFormat(
+    sheet.update("A2:J2", [HEADERS])
+    format_cell_range(sheet, "A2:J2", CellFormat(
         backgroundColor=COLOR_VERDE,
         textFormat=TextFormat(bold=True, fontSize=11, foregroundColor=COLOR_BLANCO),
         horizontalAlignment="CENTER",
@@ -106,7 +107,7 @@ def setup_formato():
                 "properties": {"pixelSize": ancho},
                 "fields": "pixelSize"
             }}
-            for i, ancho in enumerate([150, 180, 180, 220, 200, 160, 100, 160, 220])
+            for i, ancho in enumerate([150, 180, 180, 220, 200, 160, 100, 160, 220, 150])
         ]
     }
     spreadsheet.batch_update(body)
@@ -116,7 +117,7 @@ def setup_formato():
 
 def _aplicar_color_fila(sheet, fila_num: int):
     color = COLOR_FILA_PAR if fila_num % 2 == 0 else COLOR_BLANCO
-    rango = f"A{fila_num}:I{fila_num}"
+    rango = f"A{fila_num}:J{fila_num}"
     format_cell_range(sheet, rango, CellFormat(backgroundColor=color))
 
 
@@ -135,6 +136,7 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
         score,
         ESTADO_A_TEXTO["pending"],
         "",
+        "No",
     ]
 
     sheet = None
@@ -157,6 +159,41 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
         print(f"[Sheets] Error al aplicar formato (dato guardado igualmente): {e}")
 
     return True
+
+
+def obtener_leads_para_seguimiento(dias: int = 3) -> list:
+    """Leads de hace 'dias' días o más, que siguen 'Pendiente confirmar' y sin seguimiento
+    ya enviado — para el job diario de reenganche por WhatsApp."""
+    sheet = get_sheet()
+    filas = sheet.get_all_values()[2:]
+    limite_fecha = datetime.now() - timedelta(days=dias)
+
+    resultado = []
+    for i, fila in enumerate(filas):
+        if len(fila) < 10 or not fila[1].strip():
+            continue
+        fecha_str, telefono, nombre = fila[0], fila[1], fila[2]
+        estado_texto, seguimiento_enviado = fila[7], fila[9]
+        if estado_texto != ESTADO_A_TEXTO["pending"] or seguimiento_enviado == "Sí":
+            continue
+        try:
+            fecha = datetime.strptime(fecha_str, "%d/%m/%Y %H:%M")
+        except ValueError:
+            continue
+        if fecha > limite_fecha:
+            continue
+        resultado.append({"fila": i + 3, "telefono": telefono, "nombre": nombre})
+    return resultado
+
+
+def marcar_seguimiento_enviado(fila: int) -> bool:
+    for intento in range(3):
+        try:
+            get_sheet().update_cell(fila, 10, "Sí")
+            return True
+        except Exception as e:
+            print(f"[Sheets] Error marcando seguimiento (intento {intento + 1}/3): {type(e).__name__}: {e}")
+    return False
 
 
 def listar_leads(limite: int = 200) -> list:
