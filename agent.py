@@ -122,7 +122,27 @@ class OftalmologiaAgent:
         if not key:
             raise ValueError("ANTHROPIC_API_KEY no está configurada")
         self.client = Anthropic(api_key=key)
+        # Cloudflare AI Gateway (logs y costos). Sin AI_GATEWAY_URL, todo va directo a Anthropic.
+        self.gateway_client = None
+        gateway_url = os.getenv("AI_GATEWAY_URL", "")
+        if gateway_url:
+            token = os.getenv("AI_GATEWAY_TOKEN", "")
+            self.gateway_client = Anthropic(
+                api_key=key,
+                base_url=gateway_url,
+                default_headers={"cf-aig-authorization": f"Bearer {token}"} if token else None,
+                max_retries=1,
+            )
         self.conversations: dict[str, Conversation] = {}
+
+    def _create_message(self, **kwargs):
+        if self.gateway_client:
+            try:
+                return self.gateway_client.messages.create(**kwargs)
+            except Exception as e:
+                # Cualquier falla del gateway cae a Anthropic directo: el prospecto siempre recibe respuesta.
+                print(f"[ai-gateway] falló ({getattr(e, 'status_code', None) or type(e).__name__}), se usa Anthropic directo")
+        return self.client.messages.create(**kwargs)
 
     def get_or_create_conversation(self, phone_number: str) -> Conversation:
         if phone_number not in self.conversations:
@@ -170,7 +190,7 @@ class OftalmologiaAgent:
         ultimo_error = None
         for intento in range(3):
             try:
-                response = self.client.messages.create(
+                response = self._create_message(
                     model=self.MODEL,
                     max_tokens=450,
                     system=SYSTEM_PROMPT,

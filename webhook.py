@@ -12,6 +12,9 @@ Para conectar con Twilio:
 
 import os
 from collections import deque
+from datetime import datetime
+from functools import wraps
+from zoneinfo import ZoneInfo
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, request, Response, jsonify
@@ -65,12 +68,47 @@ def _token_valido() -> bool:
 _processed_sids = deque(maxlen=200)
 
 
+# Firma de Twilio. off: no valida (comportamiento de siempre). observe: valida y loguea, pero
+# nunca bloquea. enforce: rechaza lo que no venga firmado por Twilio.
+TWILIO_VALIDATION = os.getenv("TWILIO_VALIDATION", "off").lower() if TWILIO_AUTH_TOKEN else "off"
+_twilio_validator = RequestValidator(TWILIO_AUTH_TOKEN) if TWILIO_AUTH_TOKEN else None
+
+# Tope de mensajes por número por día. 0 = sin tope (comportamiento de siempre).
+MAX_MESSAGES_PER_DAY = int(os.getenv("MAX_MESSAGES_PER_DAY", "0") or 0)
+_mensajes_por_dia: dict[str, tuple[str, int]] = {}
+TZ_AR = ZoneInfo("America/Argentina/Buenos_Aires")
+
+
+def _url_publica() -> str:
+    # Railway termina HTTPS en su proxy: Flask ve http://, pero Twilio firmó la URL https://.
+    url = request.url
+    if request.headers.get("X-Forwarded-Proto") == "https" and url.startswith("http://"):
+        url = "https://" + url[len("http://"):]
+    return url
+
+
 def validate_twilio_request(f):
-    """Decorador desactivado en modo sandbox/desarrollo."""
+    @wraps(f)
     def decorated(*args, **kwargs):
+        if TWILIO_VALIDATION != "off":
+            firma = request.headers.get("X-Twilio-Signature", "")
+            if not _twilio_validator.validate(_url_publica(), request.form, firma):
+                print(
+                    f"[twilio] firma inválida modo={TWILIO_VALIDATION} url={_url_publica()} "
+                    f"from={request.form.get('From', '')}"
+                )
+                if TWILIO_VALIDATION == "enforce":
+                    return Response("Forbidden", status=403)
         return f(*args, **kwargs)
-    decorated.__name__ = f.__name__
     return decorated
+
+
+def _contar_mensaje_del_dia(numero: str) -> int:
+    hoy = datetime.now(TZ_AR).date().isoformat()
+    fecha, cantidad = _mensajes_por_dia.get(numero, (hoy, 0))
+    cantidad = cantidad + 1 if fecha == hoy else 1
+    _mensajes_por_dia[numero] = (hoy, cantidad)
+    return cantidad
 
 
 @app.route("/webhook", methods=["POST"])
@@ -92,6 +130,20 @@ def webhook():
 
     if not incoming_msg:
         return Response("OK", status=200)
+
+    if MAX_MESSAGES_PER_DAY:
+        cantidad = _contar_mensaje_del_dia(sender_number)
+        if cantidad > MAX_MESSAGES_PER_DAY:
+            resp = MessagingResponse()
+            # Se avisa una sola vez; después se ignora en silencio para no gastar Twilio.
+            if cantidad == MAX_MESSAGES_PER_DAY + 1:
+                print(f"[limite] {sender_number} superó {MAX_MESSAGES_PER_DAY} mensajes hoy")
+                resp.message(
+                    "Por hoy llegamos al límite de mensajes de la demo 🙂 Mañana podés seguir "
+                    "probándome. Si ya querés avanzar, el equipo de Kyrios te contacta desde "
+                    "kyrioscomunicacion.com"
+                )
+            return Response(str(resp), status=200, mimetype="application/xml")
 
     # Comandos especiales para gestión
     if incoming_msg.lower() in ["reiniciar", "restart", "nueva consulta"]:
