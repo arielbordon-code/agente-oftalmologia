@@ -6,6 +6,7 @@ calificación, y cierra pidiendo los datos reales del prospecto
 para coordinar una llamada comercial.
 """
 
+import base64
 import time
 from anthropic import Anthropic
 from dataclasses import dataclass, field
@@ -13,6 +14,9 @@ from typing import Optional
 from sheets import registrar_lead, registrar_inicio_conversacion
 from dashboard_utils import obtener_iniciales, asignar_color
 from telegram_service import notify_lead
+
+# Tamaño máximo de un archivo de WhatsApp que se manda a Claude (evita requests gigantes).
+MAX_MEDIA_BYTES = 15 * 1024 * 1024
 
 SYSTEM_PROMPT = """Sos Valentina, la demo en vivo de un agente de IA para WhatsApp. Quien te escribe es un prospecto probando la demo para decidir si contratar el servicio — NO es un cliente real de ningún negocio. Tu objetivo es que, después de ver cómo trabajás, quiera contratar un agente como vos para su propio negocio.
 
@@ -71,6 +75,9 @@ Clave: dejá explícito que lo que acaba de vivir en ESTA charla (responder al i
 Ejemplo de estructura (adaptá el contenido real a lo que dijo, no copies esto literal, y no metas los 5 puntos de corrido como una lista — elegí 2-3 frases naturales):
 "Esto que viste no es una simulación — es exactamente lo que tendrías funcionando en tu WhatsApp, resolviendo [lo que dijo que quería resolver en la Etapa 0] todos los días, con tus datos reales y sin que estés vos atrás del teléfono. También puede confirmar turnos o cobrar solo, y si un cliente no te contesta, le vuelve a escribir a los pocos días — como me va a pasar a mí con vos si te quedás callado 😉. Encima vas a tener un panel para ver cuántos leads entran y cómo les fue. Te contacta el equipo a [horario que dio] para mostrarte cómo lo armamos para [nombre de su negocio]."
 
+## SI EL PROSPECTO MANDA UNA FOTO O UN DOCUMENTO
+Podés ver el contenido real de fotos y PDFs que te manden — no son datos de ejemplo, es así de verdad. Respondé sobre lo que realmente ves o dice el documento, en el personaje que corresponda según la etapa en la que estés. Después de responder, marcá el valor en una frase corta: por ejemplo "(Esto también lo hago con fotos y documentos reales que te manden tus clientes, no solo texto)". No lo repitas más de una vez en toda la charla.
+
 ## REGLAS IMPORTANTES
 - Español rioplatense (vos, tenés, etc.), cálida y profesional
 - Máximo 3-4 oraciones por mensaje (podés estirar un poco en el cierre comercial de la Etapa 5)
@@ -91,13 +98,64 @@ IMPORTANTE: Reemplazá SIEMPRE los campos con los datos reales que te dio el pro
 """
 
 
+def _message_text(content) -> str:
+    """Texto legible de un mensaje, sea texto plano o una lista de bloques (foto/documento)."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        partes = []
+        for block in content:
+            if block.get("type") == "text":
+                partes.append(block["text"])
+            elif block.get("type") == "image":
+                partes.append("[foto adjunta]")
+            elif block.get("type") == "document":
+                partes.append("[documento adjunto]")
+        return " ".join(p for p in partes if p)
+    return ""
+
+
 def _build_transcript(messages: list) -> str:
     """Texto legible de la charla hasta ahora, para darle contexto a Ariel en la notificación."""
     lineas = []
     for m in messages:
         quien = "Prospecto" if m["role"] == "user" else "Valentina"
-        lineas.append(f"{quien}: {m['content']}")
+        lineas.append(f"{quien}: {_message_text(m['content'])}")
     return "\n".join(lineas)
+
+
+def _build_user_content(user_message: str, media: Optional[list] = None):
+    """Arma el content del mensaje del usuario: texto simple si no hay adjuntos,
+    o una lista de bloques (texto + imagen/documento) si los hay — Claude entiende
+    fotos y PDFs de forma nativa, sin pasos intermedios."""
+    if not media:
+        return user_message
+
+    bloques = []
+    if user_message:
+        bloques.append({"type": "text", "text": user_message})
+
+    for item in media:
+        content_type = item.get("content_type", "")
+        data = item.get("data")
+        if not data:
+            continue
+        if len(data) > MAX_MEDIA_BYTES:
+            bloques.append({"type": "text", "text": "[El prospecto mandó un archivo demasiado pesado para procesar.]"})
+            continue
+        b64data = base64.b64encode(data).decode()
+        if content_type.startswith("image/"):
+            bloques.append({"type": "image", "source": {"type": "base64", "media_type": content_type, "data": b64data}})
+        elif content_type == "application/pdf":
+            bloques.append({"type": "document", "source": {"type": "base64", "media_type": content_type, "data": b64data}})
+        elif content_type.startswith("audio/"):
+            bloques.append({"type": "text", "text": "[El prospecto mandó un audio de WhatsApp — todavía no lo podés escuchar. Avisale con naturalidad que por ahora te lo escriba, y que en la versión real para su negocio esto también se puede sumar.]"})
+        else:
+            bloques.append({"type": "text", "text": f"[El prospecto mandó un archivo ({content_type or 'tipo desconocido'}) que no podés procesar todavía.]"})
+
+    if not bloques:
+        bloques.append({"type": "text", "text": ""})
+    return bloques
 
 
 @dataclass
@@ -179,13 +237,13 @@ class OftalmologiaAgent:
         else:
             print(f"[Sheets] ⚠️ Reintento fallido para {phone_number}, se intentará de nuevo")
 
-    def reply(self, phone_number: str, user_message: str) -> str:
+    def reply(self, phone_number: str, user_message: str, media: Optional[list] = None) -> str:
         self._podar_conversaciones_viejas()
         self._retry_pending_lead(phone_number)
         conv = self.get_or_create_conversation(phone_number)
         conv.last_activity = time.time()
 
-        conv.messages.append({"role": "user", "content": user_message})
+        conv.messages.append({"role": "user", "content": _build_user_content(user_message, media)})
 
         ultimo_error = None
         for intento in range(3):
@@ -271,7 +329,7 @@ class OftalmologiaAgent:
                 "nombre": nombre,
                 "status": status,
                 "messages": [
-                    {"from": "bot" if m["role"] == "assistant" else "user", "text": m["content"]}
+                    {"from": "bot" if m["role"] == "assistant" else "user", "text": _message_text(m["content"])}
                     for m in conv.messages
                 ],
                 "last_activity": conv.last_activity,
@@ -288,7 +346,7 @@ class OftalmologiaAgent:
             "phone_number": phone_number,
             "total_mensajes": len(conv.messages),
             "ultimo_mensaje_usuario": next(
-                (m["content"] for m in reversed(conv.messages) if m["role"] == "user"),
+                (_message_text(m["content"]) for m in reversed(conv.messages) if m["role"] == "user"),
                 None
             ),
         }

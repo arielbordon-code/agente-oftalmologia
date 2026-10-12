@@ -11,9 +11,11 @@ Para conectar con Twilio:
 """
 
 import os
+import httpx
 from collections import deque
 from datetime import datetime
 from functools import wraps
+from typing import Optional
 from zoneinfo import ZoneInfo
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -41,6 +43,7 @@ app = Flask(__name__)
 agent = EsteticaAgent(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 
 
 def _run_followups():
@@ -103,6 +106,18 @@ def validate_twilio_request(f):
     return decorated
 
 
+def _descargar_media(media_url: str) -> Optional[bytes]:
+    """Descarga un adjunto de WhatsApp. Las URLs de media de Twilio piden auth básica
+    con el Account SID y el Auth Token, igual que cualquier otro recurso de su API."""
+    try:
+        resp = httpx.get(media_url, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN), timeout=10)
+        resp.raise_for_status()
+        return resp.content
+    except Exception as e:
+        print(f"[media] Error descargando adjunto: {e}")
+        return None
+
+
 def _contar_mensaje_del_dia(numero: str) -> int:
     hoy = datetime.now(TZ_AR).date().isoformat()
     fecha, cantidad = _mensajes_por_dia.get(numero, (hoy, 0))
@@ -126,9 +141,20 @@ def webhook():
     if message_sid:
         _processed_sids.append(message_sid)
 
-    print(f"[{sender_number}] → {incoming_msg}")
+    num_media = int(request.form.get("NumMedia", "0") or 0)
+    media = []
+    for i in range(num_media):
+        media_url = request.form.get(f"MediaUrl{i}")
+        content_type = request.form.get(f"MediaContentType{i}", "")
+        if not media_url:
+            continue
+        data = _descargar_media(media_url)
+        if data:
+            media.append({"content_type": content_type, "data": data})
 
-    if not incoming_msg:
+    print(f"[{sender_number}] → {incoming_msg}" + (f" (+{len(media)} adjunto/s)" if media else ""))
+
+    if not incoming_msg and not media:
         return Response("OK", status=200)
 
     if MAX_MESSAGES_PER_DAY:
@@ -154,7 +180,7 @@ def webhook():
             "WhatsApp (turnos, consultas, pedidos)?"
         )
     else:
-        reply_text = agent.reply(sender_number, incoming_msg)
+        reply_text = agent.reply(sender_number, incoming_msg, media=media)
 
     print(f"[{sender_number}] ← {reply_text}")
 
