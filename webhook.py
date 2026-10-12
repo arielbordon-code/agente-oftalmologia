@@ -108,9 +108,12 @@ def validate_twilio_request(f):
 
 def _descargar_media(media_url: str) -> Optional[bytes]:
     """Descarga un adjunto de WhatsApp. Las URLs de media de Twilio piden auth básica
-    con el Account SID y el Auth Token, igual que cualquier otro recurso de su API."""
+    con el Account SID y el Auth Token, igual que cualquier otro recurso de su API.
+    Twilio responde con un 307 hacia su CDN, por eso hay que seguir la redirección."""
     try:
-        resp = httpx.get(media_url, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN), timeout=10)
+        resp = httpx.get(
+            media_url, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN), timeout=10, follow_redirects=True
+        )
         resp.raise_for_status()
         return resp.content
     except Exception as e:

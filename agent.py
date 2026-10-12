@@ -8,6 +8,7 @@ para coordinar una llamada comercial.
 
 import base64
 import time
+import transcripcion
 from anthropic import Anthropic
 from dataclasses import dataclass, field
 from typing import Optional
@@ -139,6 +140,16 @@ def _build_user_content(user_message: str, media: Optional[list] = None):
         content_type = item.get("content_type", "")
         data = item.get("data")
         if not data:
+            continue
+        if content_type.startswith("audio/") and transcripcion.activa():
+            if len(data) > transcripcion.MAX_AUDIO_BYTES:
+                bloques.append({"type": "text", "text": "[El prospecto mandó un audio de WhatsApp demasiado largo para escucharlo ahora. Pedile con naturalidad que te lo mande en un audio más corto (menos de un minuto) o que te lo escriba.]"})
+                continue
+            texto_audio = transcripcion.transcribir(data)
+            if texto_audio:
+                bloques.append({"type": "text", "text": f"[Audio de WhatsApp del prospecto, transcripto automáticamente — respondé a lo que dijo como a cualquier mensaje]: {texto_audio}"})
+            else:
+                bloques.append({"type": "text", "text": "[El prospecto mandó un audio de WhatsApp pero no se pudo escuchar bien. Pedile con naturalidad que lo repita o que te lo escriba.]"})
             continue
         if len(data) > MAX_MEDIA_BYTES:
             bloques.append({"type": "text", "text": "[El prospecto mandó un archivo demasiado pesado para procesar.]"})
