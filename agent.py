@@ -7,6 +7,7 @@ para coordinar una llamada comercial.
 """
 
 import base64
+import os
 import time
 import transcripcion
 from anthropic import Anthropic
@@ -183,7 +184,8 @@ class Conversation:
 class OftalmologiaAgent:
     """Agente conversacional de demostración comercial (Valentina)."""
 
-    MODEL = "claude-haiku-4-5-20251001"
+    # Se puede cambiar desde Railway (CLAUDE_MODEL) sin tocar código.
+    MODEL = os.getenv("CLAUDE_MODEL", "claude-haiku-5-5")
 
     def __init__(self, api_key: Optional[str] = None):
         import os
@@ -261,7 +263,12 @@ class OftalmologiaAgent:
             try:
                 response = self._create_message(
                     model=self.MODEL,
-                    max_tokens=450,
+                    # ~1600 caracteres (límite de un mensaje de WhatsApp en Twilio). Haiku 5.5 usa
+                    # ~30% más tokens por el mismo texto que Haiku 4.5, donde este tope era 450.
+                    max_tokens=580,
+                    # Sin thinking: igual que con Haiku 4.5, y así el tope de arriba es todo texto.
+                    thinking={"type": "disabled"},
+                    output_config={"effort": "low"},
                     system=SYSTEM_PROMPT,
                     messages=conv.messages,
                 )
