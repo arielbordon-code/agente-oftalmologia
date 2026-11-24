@@ -32,6 +32,7 @@ def notify_lead(
     sucursal: str = "",
     horario: str = "",
     resumen: str = "",
+    origen: str = "",
 ) -> bool:
     numero_limpio = telefono.replace("whatsapp:", "").strip()
     numero_wa = "".join(c for c in numero_limpio if c.isdigit())
@@ -43,7 +44,7 @@ def notify_lead(
     bloque_resumen = f"📋 *Resumen de la conversación:*\n{resumen}\n\n" if resumen else ""
 
     text = (
-        f"🎯 *Nuevo lead — Demo Valentina*\n\n"
+        f"🎯 *Nuevo lead — Demo Valentina{f' ({origen})' if origen else ''}*\n\n"
         f"👤 {nombre}\n"
         f"📞 {telefono_link}\n"
         f"🏢 {sucursal or 'No especificado'}\n"

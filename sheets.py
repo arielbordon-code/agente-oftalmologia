@@ -122,7 +122,7 @@ def _aplicar_color_fila(sheet, fila_num: int):
 
 
 def registrar_lead(telefono: str, nombre: str, tratamiento: str,
-                   sucursal: str = "", horario: str = ""):
+                   sucursal: str = "", horario: str = "", notas: str = ""):
     """Registra un lead calificado en el Sheet."""
     print(f"[Sheets] Intentando registrar: {nombre} | {tratamiento} | {horario}")
     score = calcular_score(tratamiento)
@@ -135,7 +135,7 @@ def registrar_lead(telefono: str, nombre: str, tratamiento: str,
         horario,
         score,
         ESTADO_A_TEXTO["pending"],
-        "",
+        notas,
         "No",
     ]
 

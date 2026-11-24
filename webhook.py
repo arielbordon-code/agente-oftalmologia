@@ -35,6 +35,7 @@ from sheets import (
     marcar_seguimiento_enviado,
 )
 from whatsapp_followup import send_followup_whatsapp
+import voz_postllamada
 
 load_dotenv()
 
@@ -191,6 +192,15 @@ def webhook():
     resp = MessagingResponse()
     resp.message(reply_text)
     return Response(str(resp), status=200, mimetype="application/xml")
+
+
+@app.route("/voz/postllamada", methods=["POST"])
+def voz_postllamada_webhook():
+    """Webhook de ElevenLabs al terminar cada llamada del agente de voz de Valentina."""
+    texto, status = voz_postllamada.manejar(
+        request.get_data(as_text=True), request.headers.get("elevenlabs-signature")
+    )
+    return Response(texto, status=status)
 
 
 @app.route("/health", methods=["GET"])
