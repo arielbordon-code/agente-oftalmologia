@@ -18,8 +18,9 @@ from typing import Optional
 from sheets import registrar_lead
 from telegram_service import notify_lead
 
-WEBHOOK_SECRET = os.getenv("ELEVENLABS_WEBHOOK_SECRET", "")
-AGENT_ID = os.getenv("ELEVENLABS_AGENT_ID", "")
+# .strip(): al pegar en Railway suele colarse un espacio o salto de línea al final.
+WEBHOOK_SECRET = os.getenv("ELEVENLABS_WEBHOOK_SECRET", "").strip()
+AGENT_ID = os.getenv("ELEVENLABS_AGENT_ID", "").strip()
 TOLERANCIA_SEGUNDOS = 30 * 60
 
 # ElevenLabs puede reintentar el mismo webhook: no registrar dos veces la misma llamada.
