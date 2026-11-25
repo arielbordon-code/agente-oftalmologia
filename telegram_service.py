@@ -9,13 +9,16 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 
-def _send(text: str) -> bool:
+def _send(text: str, markdown: bool = True) -> bool:
     if not BOT_TOKEN or not CHAT_ID:
         return False
+    payload = {"chat_id": CHAT_ID, "text": text}
+    if markdown:
+        payload["parse_mode"] = "Markdown"
     try:
         resp = httpx.post(
             f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            json={"chat_id": CHAT_ID, "text": text, "parse_mode": "Markdown"},
+            json=payload,
             timeout=10,
         )
         resp.raise_for_status()
@@ -54,3 +57,8 @@ def notify_lead(
         f"Tocá el número para abrirle la conversación directo en WhatsApp."
     )
     return _send(text)
+
+
+def notify_aviso(texto: str) -> bool:
+    """Aviso operativo en texto plano (sin Markdown: puede traer texto dictado por el prospecto)."""
+    return _send(texto, markdown=False)

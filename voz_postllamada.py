@@ -4,7 +4,11 @@ Leads del agente de voz de Valentina (ElevenLabs).
 Al terminar cada llamada, ElevenLabs manda un webhook "post_call_transcription" con los datos
 que extrajo (nombre, WhatsApp, negocio, rubro, qué quiere resolver, horario). Si el prospecto
 dejó nombre y WhatsApp, se registra en el mismo Sheet que los leads de WhatsApp y se avisa
-por Telegram, igual que hace agent.py.
+por Telegram, igual que hace agent.py. Si no los dejó, igual llega un aviso corto para saber
+quién probó la demo.
+
+También cuida los créditos del plan: avisa por Telegram cuando quedan pocos y cuando la demo
+llega al tope diario de llamadas configurado en el agente (agente-voz/crear_agente.py).
 """
 
 import hashlib
@@ -15,16 +19,26 @@ import time
 from collections import deque
 from typing import Optional
 
+import httpx
+
 from sheets import registrar_lead
-from telegram_service import notify_lead
+from telegram_service import notify_aviso, notify_lead
 
 # .strip(): al pegar en Railway suele colarse un espacio o salto de línea al final.
 WEBHOOK_SECRET = os.getenv("ELEVENLABS_WEBHOOK_SECRET", "").strip()
 AGENT_ID = os.getenv("ELEVENLABS_AGENT_ID", "").strip()
+# Opcional: sin esta key no se revisan los créditos (el resto funciona igual).
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "").strip()
+# Tiene que coincidir con LIMITE_DIARIO de agente-voz/crear_agente.py.
+LIMITE_DIARIO = int(os.getenv("VOZ_LIMITE_DIARIO", "4"))
 TOLERANCIA_SEGUNDOS = 30 * 60
+CREDITOS_POR_DEMO = 1200  # llamada completa de 3 minutos a ~400 créditos/min
+UMBRALES_CREDITOS = (25, 10)  # % restante en que se avisa, una vez por umbral y por período
 
 # ElevenLabs puede reintentar el mismo webhook: no registrar dos veces la misma llamada.
 _conversaciones_procesadas = deque(maxlen=200)
+_alertas_creditos_enviadas = set()  # (fecha de renovación, umbral)
+_llamadas_del_dia = {"fecha": "", "cantidad": 0}
 
 
 def firma_valida(cuerpo: str, header: str) -> bool:
@@ -72,6 +86,73 @@ def _transcripcion(transcript: list) -> str:
     return "\n".join(lineas)
 
 
+def _miles(n: int) -> str:
+    return f"{n:,}".replace(",", ".")
+
+
+def revisar_creditos() -> None:
+    """Avisa por Telegram si los créditos de ElevenLabs bajan del 25% y del 10%."""
+    if not ELEVENLABS_API_KEY:
+        return
+    try:
+        resp = httpx.get("https://api.elevenlabs.io/v1/user/subscription",
+                         headers={"xi-api-key": ELEVENLABS_API_KEY}, timeout=10)
+        resp.raise_for_status()
+        sub = resp.json()
+    except Exception as e:
+        print(f"[voz] no se pudieron revisar los créditos: {e}")
+        return
+    limite = sub.get("character_limit") or 0
+    if not limite:
+        return
+    restantes = max(limite - (sub.get("character_count") or 0), 0)
+    porcentaje = restantes * 100 / limite
+    renovacion = sub.get("next_character_count_reset_unix") or 0
+
+    superados = [u for u in UMBRALES_CREDITOS if porcentaje <= u]
+    if not superados or (renovacion, min(superados)) in _alertas_creditos_enviadas:
+        return
+    _alertas_creditos_enviadas.update((renovacion, u) for u in superados)
+    fecha = time.strftime("%d/%m", time.gmtime(renovacion - 3 * 3600)) if renovacion else "?"
+    notify_aviso(
+        f"⚠️ Créditos de ElevenLabs (agente de voz): quedan {_miles(restantes)} de {_miles(limite)} "
+        f"({porcentaje:.0f}%). Alcanzan para unas {restantes // CREDITOS_POR_DEMO} demos completas. "
+        f"Se renuevan el {fecha}. Si las demos están trayendo leads, es momento de evaluar subir de plan; "
+        f"si no, se puede bajar el tope diario."
+    )
+
+
+def _contar_llamada() -> None:
+    """Cuenta las llamadas del día (UTC) y avisa cuando se llega al tope diario del agente."""
+    hoy = time.strftime("%Y-%m-%d", time.gmtime())
+    if _llamadas_del_dia["fecha"] != hoy:
+        _llamadas_del_dia.update(fecha=hoy, cantidad=0)
+    _llamadas_del_dia["cantidad"] += 1
+    if _llamadas_del_dia["cantidad"] == LIMITE_DIARIO:
+        notify_aviso(
+            f"📵 La demo de voz llegó a {LIMITE_DIARIO} llamadas hoy, el tope diario. ElevenLabs no va a "
+            f"atender más hasta que se reinicie el contador. Si hay demanda real, se puede subir el tope "
+            f"(LIMITE_DIARIO en agente-voz/crear_agente.py)."
+        )
+
+
+def _avisar_llamada_sin_datos(data: dict, resultados: dict) -> None:
+    """Quien probó la demo sin dejar nombre y WhatsApp: aviso corto, por si se puede recuperar."""
+    if not any(t.get("role") == "user" and t.get("message") for t in data.get("transcript") or []):
+        return  # abrió la llamada y no habló: no vale la pena avisar
+    duracion = int((data.get("metadata") or {}).get("call_duration_secs") or 0)
+    nombre = _valor(resultados, "nombre")
+    negocio = " — ".join(x for x in (_valor(resultados, "negocio"), _valor(resultados, "rubro")) if x)
+    resumen = _valor(resultados, "resumen") or "(sin resumen)"
+    corte = " (se cortó por tiempo)" if duracion >= 175 else ""
+    notify_aviso(
+        f"📞 Llamada a la demo de voz sin datos de contacto — {duracion} s{corte}\n\n"
+        f"👤 {nombre or 'Sin nombre'}\n"
+        f"🏢 {negocio or 'No especificado'}\n\n"
+        f"{resumen}"
+    )
+
+
 def procesar(evento: dict) -> str:
     """Procesa un evento ya verificado. Devuelve un texto corto para el log."""
     if evento.get("type") != "post_call_transcription":
@@ -84,11 +165,13 @@ def procesar(evento: dict) -> str:
     if conversation_id in _conversaciones_procesadas:
         return f"{conversation_id} duplicado, ignorado"
     _conversaciones_procesadas.append(conversation_id)
+    _contar_llamada()
 
     resultados = (data.get("analysis") or {}).get("data_collection_results") or {}
     nombre = _valor(resultados, "nombre")
     whatsapp_dictado = _valor(resultados, "whatsapp")
     if not nombre or not whatsapp_dictado:
+        _avisar_llamada_sin_datos(data, resultados)
         return f"{conversation_id} sin nombre o WhatsApp, no es lead"
 
     telefono, numero_ok = normalizar_whatsapp_ar(whatsapp_dictado)
@@ -125,4 +208,5 @@ def manejar(cuerpo: str, header_firma: Optional[str]) -> tuple[str, int]:
     except json.JSONDecodeError:
         return "Bad Request", 400
     print(f"[voz] {procesar(evento)}")
+    revisar_creditos()
     return "OK", 200
