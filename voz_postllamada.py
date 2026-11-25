@@ -15,6 +15,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import time
 from collections import deque
 from typing import Optional
@@ -75,6 +76,20 @@ def normalizar_whatsapp_ar(numero: str) -> tuple[str, bool]:
 def _valor(resultados: dict, clave: str) -> str:
     valor = (resultados.get(clave) or {}).get("value")
     return str(valor).strip() if valor not in (None, "None") else ""
+
+
+def _numero_en_transcripcion(transcript: list) -> str:
+    """Último número de teléfono que dictó el prospecto (8 a 13 dígitos, con o sin espacios/guiones).
+    Respaldo para cuando ElevenLabs no lo extrajo, p. ej. si la llamada se cortó antes de confirmarlo."""
+    encontrado = ""
+    for t in transcript or []:
+        if t.get("role") != "user" or not t.get("message"):
+            continue
+        for bloque in re.findall(r"\d[\d .\-()]{6,}\d", t["message"]):
+            digitos = re.sub(r"\D", "", bloque)
+            if 8 <= len(digitos) <= 13:
+                encontrado = digitos
+    return encontrado
 
 
 def _transcripcion(transcript: list) -> str:
@@ -145,11 +160,17 @@ def _avisar_llamada_sin_datos(data: dict, resultados: dict) -> None:
     negocio = " — ".join(x for x in (_valor(resultados, "negocio"), _valor(resultados, "rubro")) if x)
     resumen = _valor(resultados, "resumen") or "(sin resumen)"
     corte = " (se cortó por tiempo)" if duracion >= 175 else ""
+    # Lo que dijo el prospecto, textual: si dictó un número que no quedó registrado, aparece acá.
+    dichos = "\n".join(f"• {t['message']}" for t in data.get("transcript") or []
+                       if t.get("role") == "user" and t.get("message"))
+    if len(dichos) > 2000:
+        dichos = "…" + dichos[-2000:]
     notify_aviso(
         f"📞 Llamada a la demo de voz sin datos de contacto — {duracion} s{corte}\n\n"
         f"👤 {nombre or 'Sin nombre'}\n"
         f"🏢 {negocio or 'No especificado'}\n\n"
-        f"{resumen}"
+        f"{resumen}\n\n"
+        f"🗣 Lo que dijo el prospecto (por si dictó un número):\n{dichos}"
     )
 
 
@@ -170,9 +191,14 @@ def procesar(evento: dict) -> str:
     resultados = (data.get("analysis") or {}).get("data_collection_results") or {}
     nombre = _valor(resultados, "nombre")
     whatsapp_dictado = _valor(resultados, "whatsapp")
-    if not nombre or not whatsapp_dictado:
+    tomado_de_transcripcion = False
+    if not whatsapp_dictado:
+        whatsapp_dictado = _numero_en_transcripcion(data.get("transcript"))
+        tomado_de_transcripcion = bool(whatsapp_dictado)
+    if not whatsapp_dictado:
         _avisar_llamada_sin_datos(data, resultados)
-        return f"{conversation_id} sin nombre o WhatsApp, no es lead"
+        return f"{conversation_id} sin WhatsApp, no es lead"
+    nombre = nombre or "Sin nombre (llamada de voz)"
 
     telefono, numero_ok = normalizar_whatsapp_ar(whatsapp_dictado)
     negocio, rubro = _valor(resultados, "negocio"), _valor(resultados, "rubro")
@@ -184,6 +210,8 @@ def procesar(evento: dict) -> str:
         "horario": _valor(resultados, "horario"),
     }
     nota = "Lead de llamada de voz"
+    if tomado_de_transcripcion:
+        nota += " — número tomado de la transcripción, SIN CONFIRMAR"
     if not numero_ok:
         nota += f" — VERIFICAR NÚMERO: se dictó '{whatsapp_dictado}'"
 
@@ -194,6 +222,8 @@ def procesar(evento: dict) -> str:
         resumen = "⚠️ NO SE PUDO GUARDAR EN EL SHEET — cargalo a mano.\n\n" + resumen
     if not numero_ok:
         resumen = f"⚠️ Revisar el número: se dictó '{whatsapp_dictado}'.\n\n" + resumen
+    if tomado_de_transcripcion:
+        resumen = "⚠️ La llamada terminó antes de confirmar el número: lo saqué de lo que dictó el prospecto.\n\n" + resumen
     notify_lead(**lead, resumen=resumen, origen="llamada de voz")
     return f"{conversation_id} lead {nombre} {'registrado' if ok else 'NO registrado en Sheet'}"
 
